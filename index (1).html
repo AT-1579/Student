@@ -1,338 +1,460 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <!-- ============================= -->
- <!-- META CONFIGURATION -->
- <!-- ============================= -->
- <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>AdaptIQ – Adaptive Online Assessment Platform</title>
- <meta name="description" content="AI-powered adaptive testing platform with real-time difficulty adjustment using IRT." />
- <!-- ============================= -->
- <!-- EXTERNAL STYLESHEET (PLACEHOLDER) -->
- <!-- ============================= -->
- <link rel="stylesheet" href="css/style.css" />
- <!-- ============================= -->
- <!-- INTERNAL CSS (FULL VERSION) -->
- <!-- ============================= -->
- <style>
- :root {
- --bg-card: #13131e;
- --border: #2a2a3a;
- --radius-xl: 18px;
- --radius-lg: 14px;
- --accent-purple: #6366f1;
- --accent-red: #ef4444;
- --text-secondary: #a1a1aa;
- }
- body {
- margin: 0;
- font-family: 'Segoe UI', sans-serif;
- background: #0f0f17;
- color: white;
- overflow-x: hidden;
- }
- .hero {
- min-height: 100vh;
- display: flex;
- flex-direction: column;
- align-items: center;
- justify-content: center;
- padding: 80px 24px;
- text-align: center;
- }
- .role-cards {
- display: grid;
- grid-template-columns: 1fr 1fr;
- gap: 20px;
- max-width: 600px;
- width: 100%;
- }
- .role-card {
- background: var(--bg-card);
- border: 1.5px solid var(--border);
- border-radius: var(--radius-xl);
- padding: 32px 24px;
- cursor: pointer;
- transition: all 0.3s ease;
- }
- .role-card:hover {
- border-color: var(--accent-purple);
- transform: translateY(-4px);
- }
- .modal-overlay {
- position: fixed;
- inset: 0;
- background: rgba(0,0,0,0.7);
- display: flex;
- align-items: center;
- justify-content: center;
- opacity: 0;
- pointer-events: none;
- transition: 0.3s;
- z-index: 1000;
- }
- .modal-overlay.open {
- opacity: 1;
- pointer-events: all;
- }
- .modal {
- background: #13131e;
- border-radius: var(--radius-xl);
- padding: 40px;
- width: 100%;
- max-width: 420px;
- border: 1px solid var(--border);
- }
- input, select {
- width: 100%;
- padding: 10px;
- margin-bottom: 12px;
- border-radius: 8px;
- border: 1px solid var(--border);
- background: #1c1c28;
- color: white;
- font-size: 0.95rem;
- }
- input:focus, select:focus {
- outline: 1px solid var(--accent-purple);
- border-color: transparent;
- }
- button {
- padding: 10px 14px;
- border-radius: 8px;
- border: none;
- cursor: pointer;
- font-weight: 600;
- transition: 0.15s;
- }
- .btn-primary { background: var(--accent-purple); color: white; }
- .btn-primary:hover { background: #4f52e0; }
- .btn-secondary { background: #374151; color: white; }
- .btn-secondary:hover { background: #4b5563; }
- .btn-success { background: #16a34a; color: white; }
- .btn-success:hover { background: #15803d; }
- .error-msg {
- color: var(--accent-red);
- display: none;
- font-size: 0.85rem;
- margin-top: -8px;
- margin-bottom: 12px;
- text-align: left;
- }
- .modal h2 {
- margin-top: 0;
- margin-bottom: 1.5rem;
- font-weight: 500;
- letter-spacing: -0.02em;
- }
- .button-group {
- display: flex;
- gap: 12px;
- margin-top: 8px;
- }
- .button-group button {
- flex: 1;
- }
- </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdaptIQ – Adaptive Online Assessment Platform</title>
+  <meta name="description" content="AI-powered adaptive testing platform that personalizes assessment difficulty in real-time based on your performance." />
+  <link rel="stylesheet" href="css/style1.css" />
+  <style>
+    /* ── Landing-specific styles ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 100px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.3);
+      font-size: 0.82rem; font-weight: 600; color: #a5b4fc;
+      margin-bottom: 32px;
+      animation: fade-up 0.5s ease forwards;
+    }
+    .hero-title {
+      max-width: 780px;
+      animation: fade-up 0.6s 0.1s ease both;
+    }
+    .hero-sub {
+      max-width: 540px;
+      font-size: 1.1rem; line-height: 1.7;
+      margin: 20px 0 48px;
+      color: var(--text-secondary);
+      animation: fade-up 0.6s 0.2s ease both;
+    }
+    .role-cards {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;  /* updated to 3 columns */
+      gap: 20px; max-width: 900px; width: 100%;
+      animation: fade-up 0.6s 0.3s ease both;
+    }
+    @media (max-width: 700px) { .role-cards { grid-template-columns: 1fr; } }  /* adjusted breakpoint */
+    .role-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .role-card:hover {
+      border-color: var(--accent-purple);
+      background: rgba(99,102,241,0.08);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(99,102,241,0.2);
+    }
+    .role-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; margin: 0 auto 16px;
+    }
+    .role-card h3 { margin-bottom: 8px; }
+    .role-card p { font-size: 0.88rem; }
+
+    /* ── Login Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #13131e;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      width: 100%; max-width: 420px;
+      transform: scale(0.95); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+    .modal-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 20px; }
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+    .error-msg { color: var(--accent-red); font-size: 0.83rem; margin-top: 6px; display: none; }
+
+    /* ── Features Row ── */
+    .features {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+      max-width: 900px; width: 100%;
+      margin-top: 80px;
+      animation: fade-up 0.6s 0.5s ease both;
+    }
+    @media (max-width: 700px) { .features { grid-template-columns: 1fr; } }
+    .feature {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px;
+      transition: border-color 0.3s;
+    }
+    .feature:hover { border-color: rgba(99,102,241,0.4); }
+    .feature-emoji { font-size: 1.8rem; margin-bottom: 12px; }
+    .feature h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .feature p { font-size: 0.83rem; }
+  </style>
 </head>
 <body>
- <!-- ============================= -->
- <!-- HERO SECTION -->
- <!-- ============================= -->
- <main class="hero">
- <h1>Adaptive Assessment Platform</h1>
- <p>Personalized testing powered by Item Response Theory (IRT).</p>
- <div class="role-cards">
- <!-- Student Card -->
- <div class="role-card" onclick="openModal('student')">
- <h3>I'm a Student</h3>
- <p>Start an adaptive test session.</p>
- </div>
- <!-- Instructor Card -->
- <div class="role-card" onclick="openModal('instructor')">
- <h3>I'm an Instructor</h3>
- <p>View analytics and reports.</p>
- </div>
- </div>
- </main>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
- <!-- ============================= -->
- <!-- STUDENT MODAL -->
- <!-- ============================= -->
- <div class="modal-overlay" id="studentModal">
- <div class="modal">
- <h2>Student Login</h2>
- <input id="studentName" type="text" placeholder="Full Name" />
- <div id="nameError" class="error-msg">Please enter your name.</div>
- <input id="studentId" type="text" placeholder="Student ID (optional)" />
- <select id="studentGrade">
- <option value="">Select Grade</option>
- <option value="grade10">Grade 10</option>
- <option value="undergrad">Undergraduate</option>
- </select>
- <div class="button-group">
- <button class="btn-primary" onclick="startStudentSession()">Begin Assessment</button>
- <button class="btn-secondary" onclick="closeModal('student')">Cancel</button>
- </div>
- </div>
- </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">AdaptIQ</a>
+      <div class="flex gap-8">
+        <span class="badge" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;font-size:0.75rem;">
+          <span style="width:6px;height:6px;background:#34d399;border-radius:50%;display:inline-block;"></span>
+          Live
+        </span>
+      </div>
+    </div>
+  </header>
 
- <!-- ============================= -->
- <!-- INSTRUCTOR MODAL -->
- <!-- ============================= -->
- <div class="modal-overlay" id="instructorModal">
- <div class="modal">
- <h2>Instructor Login</h2>
- <input id="instructorName" type="text" placeholder="Instructor Name" />
- <div id="instError" class="error-msg">Please enter your name.</div>
- <div class="button-group">
- <button class="btn-success" onclick="goInstructor()">Open Dashboard</button>
- <button class="btn-secondary" onclick="closeModal('instructor')">Cancel</button>
- </div>
- </div>
- </div>
+  <!-- Hero -->
+  <main class="hero">
+    <div class="z-1">
+      <div class="hero-tag">
+        🎯 Powered by Item Response Theory (IRT)
+      </div>
+      <h1 class="hero-title">
+        <span class="grad-text">Adaptive Assessment</span><br/>that learns as you answer
+      </h1>
+      <p class="hero-sub">
+        Real-time difficulty adjustment, Bayesian ability estimation, and
+        personalized competency profiles — all in your browser.
+      </p>
 
- <!-- ============================= -->
- <!-- FIREBASE MODULE + LOGIC (FULL INTEGRATION) -->
- <!-- ============================= -->
- <script type="module">
- // ----- Firebase SDK imports (v10.12) -----
- import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
- import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
- // Import analytics and any other products you need
- import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+      <div class="role-cards">
+        <!-- Student -->
+        <div class="role-card" onclick="openModal('student')">
+          <div class="role-icon" style="background:rgba(99,102,241,0.15);">🎓</div>
+          <h3>I'm a Student</h3>
+          <p>Take an adaptive assessment tailored to your ability level.</p>
+          <br/>
+          <div class="btn btn-primary btn-full" style="pointer-events:none;margin-top:4px;">Start Test →</div>
+        </div>
+        <!-- Instructor -->
+        <div class="role-card" onclick="openModal('instructor')">
+          <div class="role-icon" style="background:rgba(34,211,238,0.12);">📊</div>
+          <h3>I'm an Instructor</h3>
+          <p>View class performance, analytics, and student competency reports.</p>
+          <br/>
+          <div class="btn btn-secondary btn-full" style="pointer-events:none;margin-top:4px;">Dashboard →</div>
+        </div>
+        <!-- Admin (new) -->
+        <div class="role-card" onclick="openModal('admin')">
+          <div class="role-icon" style="background:rgba(236,72,153,0.15);">🛡️</div>
+          <h3>I'm an Admin</h3>
+          <p>Manage users, view all sessions, and system settings.</p>
+          <br/>
+          <div class="btn btn-secondary btn-full" style="pointer-events:none;margin-top:4px;">Admin Panel →</div>
+        </div>
+      </div>
 
- // ----- Your Firebase configuration (provided) -----
- const firebaseConfig = {
-   apiKey: "AIzaSyA1wU1fyWECpkTXprHwDEUUs8YraFFdiHk",
-   authDomain: "college-website-e4684.firebaseapp.com",
-   projectId: "college-website-e4684",
-   storageBucket: "college-website-e4684.firebasestorage.app",
-   messagingSenderId: "860004770297",
-   appId: "1:860004770297:web:1550b244e4af7c74901d28",
-   measurementId: "G-G0YN0KDJ67"
- };
+      <!-- Feature Highlights -->
+      <div class="features">
+        <div class="feature">
+          <div class="feature-emoji">🧠</div>
+          <h4>3PL IRT Engine</h4>
+          <p>Three-parameter logistic model with Fisher information-based question selection.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-emoji">⚖️</div>
+          <h4>Bayesian Estimation</h4>
+          <p>EAP ability estimates updated after every response with normal prior.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-emoji">📈</div>
+          <h4>Competency Profiles</h4>
+          <p>Topic-wise mastery levels, strengths, weaknesses, and radar charts.</p>
+        </div>
+      </div>
+    </div>
+  </main>
 
- // ----- Initialize Firebase -----
- const app = initializeApp(firebaseConfig);
- const analytics = getAnalytics(app);  // Analytics initialized (optional)
- const db = getFirestore(app);
+  <!-- Student Modal -->
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal">
+      <div class="modal-icon" style="background:rgba(99,102,241,0.15);">🎓</div>
+      <h2 style="margin-bottom:8px;">Student Login</h2>
+      <p style="margin-bottom:28px;font-size:0.9rem;">Enter your details to begin your adaptive assessment session.</p>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input id="studentName" class="input" type="text" placeholder="e.g. Priya Sharma" autocomplete="off" />
+        <div class="error-msg" id="nameError">Please enter your name.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Student ID <span style="color:var(--text-muted)">(optional)</span></label>
+        <input id="studentId" class="input" type="text" placeholder="e.g. STU2024001" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grade / Year</label>
+        <select id="studentGrade" class="input" style="appearance:none;">
+          <option value="">Select Grade</option>
+          <option value="grade8">Grade 8</option>
+          <option value="grade9">Grade 9</option>
+          <option value="grade10">Grade 10</option>
+          <option value="grade11">Grade 11</option>
+          <option value="grade12">Grade 12</option>
+          <option value="undergrad">Undergraduate</option>
+          <option value="postgrad">Postgraduate</option>
+        </select>
+      </div>
+      <div class="flex gap-12" style="margin-top:8px;">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeModal('student')">Cancel</button>
+        <button class="btn btn-primary" style="flex:2" id="startTestBtn" onclick="startStudentSession()">Begin Assessment →</button>
+      </div>
+    </div>
+  </div>
 
- // Expose Firestore instances globally if needed (already using inside functions)
- console.log("Firebase initialized with project: college-website-e4684");
+  <!-- Instructor Modal -->
+  <div class="modal-overlay" id="instructorModal">
+    <div class="modal">
+      <div class="modal-icon" style="background:rgba(34,211,238,0.12);">📊</div>
+      <h2 style="margin-bottom:8px;">Instructor Access</h2>
+      <p style="margin-bottom:28px;font-size:0.9rem;">Enter your name to access the class analytics dashboard.</p>
+      <div class="form-group">
+        <label class="form-label">Instructor Name</label>
+        <input id="instructorName" class="input" type="text" placeholder="e.g. Dr. Akash Mehta" autocomplete="off" />
+        <div class="error-msg" id="instError">Please enter your name.</div>
+      </div>
+      <div class="flex gap-12" style="margin-top:8px;">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeModal('instructor')">Cancel</button>
+        <button class="btn btn-success" style="flex:2" onclick="goInstructor()">Open Dashboard →</button>
+      </div>
+    </div>
+  </div>
 
- // ----- Modal control functions (exposed globally) -----
- window.openModal = function(role) {
-   const modalId = role === 'student' ? 'studentModal' : 'instructorModal';
-   document.getElementById(modalId).classList.add('open');
-   // Clear any previous errors
-   if (role === 'student') {
-     document.getElementById('nameError').style.display = 'none';
-   } else {
-     document.getElementById('instError').style.display = 'none';
-   }
- };
+  <!-- Admin Modal (new) -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal">
+      <div class="modal-icon" style="background:rgba(236,72,153,0.15);">🛡️</div>
+      <h2 style="margin-bottom:8px;">Admin Login</h2>
+      <p style="margin-bottom:28px;font-size:0.9rem;">Enter your credentials to access the admin panel.</p>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input id="adminUsername" class="input" type="text" placeholder="admin" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="adminPassword" class="input" type="password" placeholder="••••••••" autocomplete="off" />
+        <div class="error-msg" id="adminError">Incorrect password (use 'admin123')</div>
+      </div>
+      <div class="flex gap-12" style="margin-top:8px;">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeModal('admin')">Cancel</button>
+        <button class="btn btn-primary" style="flex:2" onclick="startAdminSession()">Access Panel →</button>
+      </div>
+    </div>
+  </div>
 
- window.closeModal = function(role) {
-   const modalId = role === 'student' ? 'studentModal' : 'instructorModal';
-   document.getElementById(modalId).classList.remove('open');
- };
+  <!-- Firebase SDK + Logic (Module) -->
+  <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 
- // ----- Student session handler (with Firebase write) -----
- window.startStudentSession = async function() {
-   const name = document.getElementById('studentName').value.trim();
-   let id = document.getElementById('studentId').value.trim();
-   const grade = document.getElementById('studentGrade').value;
+    // Firebase configuration (provided)
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1wU1fyWECpkTXprHwDEUUs8YraFFdiHk",
+      authDomain: "college-website-e4684.firebaseapp.com",
+      projectId: "college-website-e4684",
+      storageBucket: "college-website-e4684.firebasestorage.app",
+      messagingSenderId: "860004770297",
+      appId: "1:860004770297:web:1550b244e4af7c74901d28",
+      measurementId: "G-G0YN0KDJ67"
+    };
 
-   // Validation
-   if (!name) {
-     document.getElementById('nameError').style.display = 'block';
-     return;
-   }
-   document.getElementById('nameError').style.display = 'none';
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
 
-   // If no ID provided, generate one based on name + timestamp
-   if (!id) {
-     id = 'STU_' + name.replace(/\s+/g, '_') + '_' + Date.now();
-   }
+    console.log("🔥 Firebase initialized with project:", firebaseConfig.projectId);
 
-   // Reference to student document
-   const studentRef = doc(db, "students", id);
+    // --- Modal functions (global) ---
+    window.openModal = function(role) {
+      document.getElementById(role === 'student' ? 'studentModal' : role === 'instructor' ? 'instructorModal' : 'adminModal').classList.add('open');
+      // Clear previous errors
+      if (role === 'student') {
+        document.getElementById('nameError').style.display = 'none';
+      } else if (role === 'instructor') {
+        document.getElementById('instError').style.display = 'none';
+      } else {
+        document.getElementById('adminError').style.display = 'none';
+      }
+    };
 
-   try {
-     const snap = await getDoc(studentRef);
-     if (!snap.exists()) {
-       // Create student record only if it doesn't exist
-       await setDoc(studentRef, {
-         name: name,
-         grade: grade || 'not specified',
-         createdAt: new Date().toISOString(),
-         studentId: id
-       });
-       console.log("New student document created with ID:", id);
-     } else {
-       console.log("Student already exists, proceeding with session.");
-     }
+    window.closeModal = function(role) {
+      document.getElementById(role === 'student' ? 'studentModal' : role === 'instructor' ? 'instructorModal' : 'adminModal').classList.remove('open');
+    };
 
-     // Store minimal session info in localStorage (for subsequent pages)
-     localStorage.setItem("currentSession", JSON.stringify({ 
-       name, 
-       id, 
-       grade: grade || 'not specified',
-       loginTime: new Date().toISOString()
-     }));
+    // Close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
 
-     // Redirect to student assessment page (you must have student.html)
-     window.location.href = "student.html";
-   } catch (error) {
-     console.error("Firestore error during student session:", error);
-     alert("Failed to connect to database. Please try again.");
-   }
- };
+    // --- Student Session with Firebase ---
+    window.startStudentSession = async function() {
+      const name = document.getElementById('studentName').value.trim();
+      const err  = document.getElementById('nameError');
+      if (!name) { err.style.display = 'block'; return; }
+      err.style.display = 'none';
 
- // ----- Instructor handler (with optional Firebase record) -----
- window.goInstructor = function() {
-   const name = document.getElementById('instructorName').value.trim();
-   if (!name) {
-     document.getElementById('instError').style.display = 'block';
-     return;
-   }
-   document.getElementById('instError').style.display = 'none';
+      // Get values
+      let studentId = document.getElementById('studentId').value.trim();
+      const grade = document.getElementById('studentGrade').value;
 
-   // Store instructor name
-   localStorage.setItem("instructorName", name);
+      // Generate ID if empty
+      if (!studentId) {
+        studentId = 'stu_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+      }
 
-   // Optionally, we could also log instructor access in Firestore
-   // but not required for demo. We'll do a silent write for tracking if desired.
-   const instSessionRef = doc(db, "instructor_logins", "inst_" + Date.now());
-   setDoc(instSessionRef, {
-     name: name,
-     loginTime: new Date().toISOString()
-   }).catch(e => console.warn("Instructor log not stored (non-critical)", e));
+      // Prepare session object (store in localStorage for student.html)
+      const session = {
+        name,
+        id: studentId,
+        grade: grade || 'not specified',
+        startTime: new Date().toISOString(),
+        responses: [],
+        usedIds: [],
+        globalTheta: 0,
+        topicThetas: {},
+        seTheta: 999,
+        questionCount: 0,
+        completed: false
+      };
 
-   // Redirect to instructor dashboard (you must have instructor.html)
-   window.location.href = "instructor.html";
- };
+      // Store in localStorage immediately
+      localStorage.setItem('currentSession', JSON.stringify(session));
 
- // Minor: clear fields when modal closes (optional, but nice)
- // We can override closeModal to also clear fields, but let's keep it simple.
- // If you want clearing, you can attach event listeners but not necessary.
- </script>
+      // --- Firebase: create/update student document ---
+      try {
+        const studentRef = doc(db, "students", studentId);
+        const snap = await getDoc(studentRef);
+        
+        if (!snap.exists()) {
+          // Create new student record
+          await setDoc(studentRef, {
+            name: name,
+            grade: grade || 'not specified',
+            createdAt: new Date().toISOString(),
+            studentId: studentId,
+            sessions: [{
+              startTime: session.startTime,
+              completed: false,
+              finalTheta: null
+            }]
+          });
+          console.log("✅ New student document created");
+        } else {
+          // Update existing student: add session reference
+          const existingData = snap.data();
+          const sessions = existingData.sessions || [];
+          sessions.push({
+            startTime: session.startTime,
+            completed: false,
+            finalTheta: null
+          });
+          await setDoc(studentRef, { sessions: sessions }, { merge: true });
+          console.log("📝 Student document updated with new session");
+        }
+      } catch (error) {
+        console.error("Firestore error:", error);
+        // Optionally notify user but still proceed (degraded mode)
+        alert("Warning: Could not save to database. Your session will continue locally.");
+      }
 
- <!-- ============================= -->
- <!-- Fallback for very old browsers (ensures modal buttons work if module fails) -->
- <!-- ============================= -->
- <script>
- (function() {
-   // Ensure that if module loading fails, the buttons don't throw
-   window.openModal = window.openModal || function(role) { alert('Firebase module loading, please wait.'); };
-   window.closeModal = window.closeModal || function(role) { };
-   window.startStudentSession = window.startStudentSession || function() { alert('Initializing... please try again in a moment.'); };
-   window.goInstructor = window.goInstructor || function() { alert('Initializing... please try again in a moment.'); };
- })();
- </script>
+      // Redirect to assessment
+      window.location.href = 'student.html';
+    };
 
- <!-- Developer note: student.html and instructor.html must exist for redirection to work -->
+    // --- Instructor Session with Firebase ---
+    window.goInstructor = async function() {
+      const name = document.getElementById('instructorName').value.trim();
+      const err  = document.getElementById('instError');
+      if (!name) { err.style.display = 'block'; return; }
+      err.style.display = 'none';
+      
+      localStorage.setItem('instructorName', name);
+
+      // Log instructor login to Firebase (optional)
+      try {
+        const loginRef = collection(db, "instructor_logins");
+        await addDoc(loginRef, {
+          name: name,
+          loginTime: new Date().toISOString(),
+          userAgent: navigator.userAgent
+        });
+        console.log("📊 Instructor login recorded");
+      } catch (e) {
+        console.warn("Instructor log not stored (non-critical)", e);
+      }
+
+      window.location.href = 'instructor.html';
+    };
+
+    // --- Admin Session (new) ---
+    window.startAdminSession = async function() {
+      const username = document.getElementById('adminUsername').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
+      const err = document.getElementById('adminError');
+      
+      // Simple hardcoded check – in a real app you'd use proper auth
+      if (password !== 'admin123') {
+        err.style.display = 'block';
+        return;
+      }
+      err.style.display = 'none';
+      
+      localStorage.setItem('adminUser', username || 'Admin');
+
+      // Optional: log admin login to Firebase
+      try {
+        const loginRef = collection(db, "admin_logins");
+        await addDoc(loginRef, {
+          username: username || 'anonymous',
+          loginTime: new Date().toISOString(),
+          userAgent: navigator.userAgent
+        });
+        console.log("🛡️ Admin login recorded");
+      } catch (e) {
+        console.warn("Admin log not stored (non-critical)", e);
+      }
+
+      window.location.href = 'admin.html';
+    };
+
+    // Enter key shortcuts
+    document.getElementById('studentName')?.addEventListener('keydown', e => { if (e.key === 'Enter') startStudentSession(); });
+    document.getElementById('instructorName')?.addEventListener('keydown', e => { if (e.key === 'Enter') goInstructor(); });
+    document.getElementById('adminPassword')?.addEventListener('keydown', e => { if (e.key === 'Enter') startAdminSession(); });
+  </script>
+
+  <!-- Non-module fallback (ensures basic functions exist if module fails) -->
+  <script>
+    (function() {
+      // Backup definitions in case module fails (extremely unlikely)
+      if (typeof window.openModal !== 'function') {
+        window.openModal = function(role) { alert('Loading Firebase... please wait.'); };
+        window.closeModal = function(role) { };
+        window.startStudentSession = function() { alert('Firebase module still loading. Try again in a moment.'); };
+        window.goInstructor = function() { alert('Firebase module still loading. Try again in a moment.'); };
+        window.startAdminSession = function() { alert('Firebase module still loading. Try again in a moment.'); };
+      }
+    })();
+  </script>
 </body>
 </html>
