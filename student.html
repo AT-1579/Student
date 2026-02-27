@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdaptIQ – Assessment</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── Assessment Layout ── */
+        .assess-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            min-height: calc(100vh - 60px);
+        }
+
+        .assess-card {
+            width: 100%;
+            max-width: 760px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Top Bar ── */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 16px;
+        }
+
+        .progress-info {
+            flex: 1;
+        }
+
+        .progress-info .prog-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* ── Question Card ── */
+        .question-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 36px 40px;
+            backdrop-filter: blur(16px);
+            transition: all 0.4s ease;
+        }
+
+        @media (max-width: 600px) {
+            .question-card {
+                padding: 24px 20px;
+            }
+        }
+
+        .q-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .q-meta {
+            flex: 1;
+        }
+
+        .q-number {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .q-difficulty-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .q-text {
+            font-size: 1.12rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 28px;
+        }
+
+        /* ── Options ── */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        /* ── Feedback Banner ── */
+        .feedback-banner {
+            display: none;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            animation: fade-up 0.3s ease;
+        }
+
+        .feedback-banner.correct {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+        }
+
+        .feedback-banner.wrong {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            color: #fb7185;
+        }
+
+        .explanation-text {
+            display: none;
+            font-size: 0.87rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* ── Bottom Row ── */
+        .bottom-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .ability-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+        }
+
+        .ability-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .ability-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        /* ── Topic Tags Row ── */
+        .topic-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        /* ── Theta Meter ── */
+        .theta-meter {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.06);
+            position: relative;
+            overflow: visible;
+            margin-top: 4px;
+        }
+
+        .theta-indicator {
+            position: absolute;
+            top: -5px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+            border: 2px solid var(--bg-primary);
+            transform: translateX(-50%);
+            transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+        }
+
+        .theta-ticks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+        }
+
+        .theta-ticks span {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* ── SE Badge ── */
+        .se-badge {
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        /* Question transition animation */
+        @keyframes q-enter {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .q-entering {
+            animation: q-enter 0.4s ease forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="orb orb-1" style="opacity:0.5;"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-inner">
+            <a class="logo" href="index.html">AdaptIQ</a>
+            <div class="flex items-center gap-16">
+                <span id="sessionName" style="font-size:0.88rem;color:var(--text-secondary);"></span>
+                <span class="se-badge" id="seBadge">SE: —</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="assess-wrap">
+        <!-- Loading State -->
+        <div id="loadingState" style="text-align:center;z-index:1;">
+            <div style="font-size:2.5rem;margin-bottom:16px;">🧠</div>
+            <h2 style="margin-bottom:8px;">Preparing your assessment…</h2>
+            <p>Selecting the optimal first question.</p>
+        </div>
+
+        <!-- Assessment Card -->
+        <div class="assess-card" id="assessCard" style="display:none;">
+
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="progress-info" style="flex:1;">
+                    <div class="prog-label">
+                        <span>Progress</span>
+                        <span id="progText">Question 1 of ~20</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                    </div>
+                </div>
+                <!-- Timer -->
+                <div class="timer-ring tooltip" data-tip="Time remaining">
+                    <svg width="72" height="72" viewBox="0 0 72 72">
+                        <circle class="track" cx="36" cy="36" r="32" />
+                        <circle class="fill" id="timerCircle" cx="36" cy="36" r="32" stroke="#6366f1"
+                            stroke-dasharray="201" stroke-dashoffset="0" />
+                    </svg>
+                    <div class="timer-value" id="timerVal">60</div>
+                </div>
+            </div>
+
+            <!-- Ability Theta Meter -->
+            <div style="margin-bottom:20px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                    <span style="font-size:0.75rem;color:var(--text-muted);">Estimated Ability (θ)</span>
+                    <span class="se-badge" id="thetaLabel" style="font-size:0.75rem;color:#a5b4fc;">θ = 0.000</span>
+                </div>
+                <div class="theta-meter">
+                    <div class="theta-indicator" id="thetaIndicator" style="left:50%;"></div>
+                </div>
+                <div class="theta-ticks">
+                    <span>−4</span><span>−2</span><span>0</span><span>+2</span><span>+4</span>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="question-card q-entering" id="questionCard">
+                <div class="q-header">
+                    <div class="q-meta">
+                        <div class="q-number" id="qNumber">Question 1</div>
+                        <div class="topic-tags" id="topicTags"></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;">Difficulty</div>
+                        <div id="difficultyDisplay" style="font-size:0.88rem;font-weight:600;">—</div>
+                    </div>
+                </div>
+
+                <p class="q-text" id="qText">Loading…</p>
+
+                <div class="options-grid" id="optionsGrid"></div>
+
+                <!-- Feedback Banner -->
+                <div class="feedback-banner" id="feedbackBanner">
+                    <span id="feedbackIcon"></span> <span id="feedbackText"></span>
+                    <div class="explanation-text" id="explanationText"></div>
+                </div>
+
+                <!-- Bottom Row -->
+                <div class="bottom-row">
+                    <div class="ability-display">
+                        <div>
+                            <div class="ability-label">Global θ</div>
+                            <div class="ability-value grad-text-purple" id="abilityVal">0.000</div>
+                        </div>
+                        <div style="width:1px;height:32px;background:var(--border);"></div>
+                        <div>
+                            <div class="ability-label">Topic θ</div>
+                            <div class="ability-value" id="topicAbilityVal" style="color:var(--accent-cyan);">0.000
+                            </div>
+                        </div>
+                    </div>
+                    <button id="submitBtn" class="btn btn-primary" onclick="submitAnswer()" disabled>Confirm
+                        Answer</button>
+                </div>
+            </div>
+
+            <!-- Next Button (After Answer) -->
+            <div style="text-align:right;margin-top:16px;display:none;" id="nextBtnWrap">
+                <button class="btn btn-primary" id="nextBtn" onclick="loadNextQuestion()">
+                    Next Question →
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Question Bank & Engine -->
+    <script src="js/questionBank.js"></script>
+    <script src="js/adaptiveEngine.js"></script>
+
+    <script>
+        // ─── State ───────────────────────────────────────────────────────────────
+        let session = null;
+        let currentQuestion = null;
+        let selectedOption = null;
+        let answered = false;
+        let timerInterval = null;
+        let timeLeft = 60;
+        const MAX_QUESTIONS = 20;
+        const LETTERS = ['A', 'B', 'C', 'D'];
+
+        // ─── Init ─────────────────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            const raw = localStorage.getItem('currentSession');
+            if (!raw) { window.location.href = 'index.html'; return; }
+            session = JSON.parse(raw);
+
+            document.getElementById('sessionName').textContent = session.name;
+
+            setTimeout(() => {
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('assessCard').style.display = 'block';
+                loadNextQuestion();
+            }, 800);
+        });
+
+        // ─── Load Next Question ───────────────────────────────────────────────────
+        function loadNextQuestion() {
+            // Check termination
+            const se = AdaptiveEngine.standardError(session.globalTheta, session.responses);
+            const term = AdaptiveEngine.shouldTerminate(se, session.questionCount, MAX_QUESTIONS, 0.35);
+            if (term.terminate) {
+                finishAssessment();
+                return;
+            }
+
+            // Select next question
+            const usedSet = new Set(session.usedIds);
+            const q = AdaptiveEngine.selectNextQuestion(
+                session.globalTheta, session.topicThetas, usedSet, QUESTION_BANK
+            );
+            if (!q) { finishAssessment(); return; }
+
+            currentQuestion = q;
+            selectedOption = null;
+            answered = false;
+
+            renderQuestion(q);
+            updateUI();
+            startTimer();
+
+            document.getElementById('nextBtnWrap').style.display = 'none';
+
+            // Animate card
+            const card = document.getElementById('questionCard');
+            card.classList.remove('q-entering');
+            void card.offsetWidth;
+            card.classList.add('q-entering');
+        }
+
+        // ─── Render Question ──────────────────────────────────────────────────────
+        function renderQuestion(q) {
+            const idx = session.questionCount + 1;
+            document.getElementById('qNumber').textContent = `Question ${idx}`;
+            document.getElementById('progText').textContent = `Question ${idx} of ~${MAX_QUESTIONS}`;
+            document.getElementById('progressFill').style.width = `${(idx / MAX_QUESTIONS) * 100}%`;
+            document.getElementById('qText').textContent = q.text;
+
+            // Topic tag
+            const tagColor = TOPIC_COLORS[q.topic] || '#6366f1';
+            document.getElementById('topicTags').innerHTML = `
+        <span class="topic-pill" style="color:${tagColor};border-color:${tagColor}33;background:${tagColor}18;">
+          ${q.topic} · ${q.subtopic}
+        </span>`;
+
+            // Difficulty label
+            const diffMap = q.b < -1 ? ['Easy', '#10b981'] : q.b < 0.5 ? ['Medium', '#f59e0b'] : q.b < 1.5 ? ['Hard', '#f97316'] : ['Very Hard', '#ef4444'];
+            document.getElementById('difficultyDisplay').innerHTML = `<span style="color:${diffMap[1]}">${diffMap[0]}</span>`;
+
+            // Options
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.id = `opt${i}`;
+                btn.onclick = () => selectOption(i);
+                btn.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span><span>${opt}</span>`;
+                grid.appendChild(btn);
+            });
+
+            // Reset feedback & submit
+            document.getElementById('feedbackBanner').style.display = 'none';
+            document.getElementById('feedbackBanner').className = 'feedback-banner';
+            document.getElementById('explanationText').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        // ─── Select Option ─────────────────────────────────────────────────────────
+        function selectOption(i) {
+            if (answered) return;
+            selectedOption = i;
+            document.querySelectorAll('.option-btn').forEach((b, j) => {
+                b.classList.toggle('selected', j === i);
+            });
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        // ─── Submit Answer ─────────────────────────────────────────────────────────
+        function submitAnswer() {
+            if (selectedOption === null || answered) return;
+            answered = true;
+            clearInterval(timerInterval);
+
+            const isCorrect = selectedOption === currentQuestion.correct;
+
+            // Highlight all options
+            currentQuestion.options.forEach((_, i) => {
+                const btn = document.getElementById(`opt${i}`);
+                btn.disabled = true;
+                if (i === currentQuestion.correct) btn.classList.add('correct');
+                else if (i === selectedOption && !isCorrect) btn.classList.add('wrong');
+            });
+
+            // Feedback banner
+            const banner = document.getElementById('feedbackBanner');
+            const icon = document.getElementById('feedbackIcon');
+            const text = document.getElementById('feedbackText');
+            const expl = document.getElementById('explanationText');
+            banner.className = `feedback-banner ${isCorrect ? 'correct' : 'wrong'}`;
+            icon.textContent = isCorrect ? '✓' : '✗';
+            text.textContent = isCorrect ? 'Correct!' : `Incorrect. The answer is ${LETTERS[currentQuestion.correct]}.`;
+            expl.textContent = currentQuestion.explanation;
+            expl.style.display = 'block';
+            banner.style.display = 'block';
+
+            // Record response
+            const resp = { question: currentQuestion, correct: isCorrect, selectedOption };
+            session.responses.push(resp);
+            session.usedIds.push(currentQuestion.id);
+            session.questionCount++;
+
+            // Update ability estimates
+            session.globalTheta = AdaptiveEngine.eapEstimate(session.responses);
+            TOPICS.forEach(t => {
+                session.topicThetas[t] = AdaptiveEngine.topicEAP(t, session.responses);
+            });
+            session.seTheta = AdaptiveEngine.standardError(session.globalTheta, session.responses);
+
+            // Save
+            localStorage.setItem('currentSession', JSON.stringify(session));
+            updateUI();
+
+            // Show next button
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtnWrap').style.display = 'block';
+        }
+
+        // ─── Timer ─────────────────────────────────────────────────────────────────
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            document.getElementById('submitBtn').style.display = '';
+            updateTimer();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (!answered) {
+                        // Auto-submit with wrong answer
+                        answered = true;
+                        const resp = { question: currentQuestion, correct: false, selectedOption: -1, timedOut: true };
+                        session.responses.push(resp);
+                        session.usedIds.push(currentQuestion.id);
+                        session.questionCount++;
+                        session.globalTheta = AdaptiveEngine.eapEstimate(session.responses);
+                        TOPICS.forEach(t => { session.topicThetas[t] = AdaptiveEngine.topicEAP(t, session.responses); });
+                        session.seTheta = AdaptiveEngine.standardError(session.globalTheta, session.responses);
+                        localStorage.setItem('currentSession', JSON.stringify(session));
+
+                        const banner = document.getElementById('feedbackBanner');
+                        banner.className = 'feedback-banner wrong';
+                        document.getElementById('feedbackIcon').textContent = '⏰';
+                        document.getElementById('feedbackText').textContent = 'Time\'s up! Question skipped.';
+                        banner.style.display = 'block';
+                        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                        document.getElementById('submitBtn').style.display = 'none';
+                        document.getElementById('nextBtnWrap').style.display = 'block';
+                        updateUI();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimer() {
+            const pct = timeLeft / 60;
+            const offset = 201 * (1 - pct);
+            const circle = document.getElementById('timerCircle');
+            circle.style.strokeDashoffset = offset;
+            // Color: green → yellow → red
+            const hue = pct > 0.5 ? 160 : pct > 0.25 ? 40 : 0;
+            circle.style.stroke = `hsl(${hue}, 80%, 55%)`;
+            document.getElementById('timerVal').textContent = timeLeft;
+            document.getElementById('timerVal').style.color = timeLeft <= 10 ? '#f43f5e' : 'var(--text-primary)';
+        }
+
+        // ─── Update UI ─────────────────────────────────────────────────────────────
+        function updateUI() {
+            const theta = session.globalTheta;
+            const se = session.seTheta;
+            const topicTheta = currentQuestion ? (session.topicThetas[currentQuestion.topic] || 0) : 0;
+
+            document.getElementById('abilityVal').textContent = theta.toFixed(3);
+            document.getElementById('topicAbilityVal').textContent = topicTheta.toFixed(3);
+            document.getElementById('thetaLabel').textContent = `θ = ${theta.toFixed(3)}`;
+            document.getElementById('seBadge').textContent = `SE: ${se < 99 ? se.toFixed(3) : '—'}`;
+
+            // Move theta indicator: range −4 to +4, mapped to 0–100%
+            const pct = ((theta + 4) / 8) * 100;
+            document.getElementById('thetaIndicator').style.left = `${Math.max(2, Math.min(98, pct))}%`;
+        }
+
+        // ─── Finish Assessment ─────────────────────────────────────────────────────
+        function finishAssessment() {
+            clearInterval(timerInterval);
+            session.completed = true;
+            session.endTime = new Date().toISOString();
+            localStorage.setItem('currentSession', JSON.stringify(session));
+
+            // Save to completed sessions list for instructor dashboard
+            const completed = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+            completed.push(session);
+            localStorage.setItem('completedSessions', JSON.stringify(completed));
+
+            window.location.href = 'report.html';
+        }
+    </script>
+</body>
+
+</html>

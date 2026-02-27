@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdaptIQ – Competency Report</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .report-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Score Hero ── */
+        .score-hero {
+            text-align: center;
+            padding: 48px 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+        }
+
+        .big-score {
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            position: relative;
+        }
+
+        .ci-range {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .mastery-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.04em;
+            margin-top: 16px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 32px 0 0;
+        }
+
+        @media (max-width: 600px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ── Section Headers ── */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        /* ── Topic Mastery Table ── */
+        .topic-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topic-row:last-child {
+            border-bottom: none;
+        }
+
+        .topic-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .topic-subtexts {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .mastery-chip {
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* ── Strengths / Weaknesses ── */
+        .sw-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .sw-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sw-card.strength {
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .sw-card.weakness {
+            border-color: rgba(244, 63, 94, 0.3);
+        }
+
+        .sw-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sw-item:last-child {
+            border-bottom: none;
+        }
+
+        .sw-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Recommendations ── */
+        .rec-list {
+            list-style: none;
+        }
+
+        .rec-list li {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .rec-list li::before {
+            content: '→';
+            color: var(--accent-purple);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ── Chart Cards ── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 700px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            padding: 24px;
+        }
+
+        /* ── Print Button ── */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .card {
+                border: 1px solid #ddd;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="orb orb-1" style="opacity:0.3;"></div>
+    <div class="orb orb-2" style="opacity:0.2;"></div>
+
+    <!-- Header -->
+    <header class="header no-print">
+        <div class="container header-inner">
+            <a class="logo" href="index.html">AdaptIQ</a>
+            <div class="flex gap-12">
+                <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Print</button>
+                <a class="btn btn-primary btn-sm" href="index.html">New Test →</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="report-wrap" id="reportContent">
+        <!-- Loading -->
+        <div id="loadingReport" style="text-align:center;padding:80px 0;">
+            <div style="font-size:2.5rem;margin-bottom:16px;">📊</div>
+            <h2>Generating your competency profile…</h2>
+        </div>
+
+        <!-- Report (hidden until ready) -->
+        <div id="mainReport" style="display:none;">
+
+            <!-- Score Hero -->
+            <div class="score-hero animate-fade-up">
+                <div
+                    style="font-size:0.8rem;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">
+                    Competency Report
+                </div>
+                <div class="big-score grad-text-purple" id="bigScore">0.000</div>
+                <div class="ci-range" id="ciRange">95% CI: [—, —]</div>
+                <div class="mastery-badge" id="masteryBadge">—</div>
+                <p style="margin-top:12px;font-size:0.9rem;" id="studentMeta">—</p>
+
+                <div class="stats-row">
+                    <div class="card stat-card">
+                        <div class="stat-value grad-text-purple" id="statQuestions">—</div>
+                        <div class="stat-label">Questions</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" style="color:var(--accent-green);" id="statCorrect">—</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" style="color:var(--accent-cyan);" id="statAccuracy">—%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" style="color:var(--accent-amber);" id="statSE">—</div>
+                        <div class="stat-label">Std. Error</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-grid" style="margin-bottom:24px;">
+                <div class="card chart-card animate-fade-up" style="animation-delay:0.1s;">
+                    <div class="section-title">
+                        <div class="section-icon" style="background:rgba(99,102,241,0.15);">📈</div>
+                        Topic Abilities
+                    </div>
+                    <div style="height:240px;"><canvas id="barChart"></canvas></div>
+                </div>
+                <div class="card chart-card animate-fade-up" style="animation-delay:0.2s;">
+                    <div class="section-title">
+                        <div class="section-icon" style="background:rgba(34,211,238,0.12);">🕸️</div>
+                        Competency Radar
+                    </div>
+                    <div style="height:240px;"><canvas id="radarChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Topic Mastery Detail -->
+            <div class="card animate-fade-up" style="margin-bottom:24px;animation-delay:0.3s;">
+                <div class="section-title">
+                    <div class="section-icon" style="background:rgba(245,158,11,0.15);">🎯</div>
+                    Topic Mastery Breakdown
+                </div>
+                <div id="topicMasteryList"></div>
+            </div>
+
+            <!-- Strengths & Weaknesses -->
+            <div class="sw-grid" style="margin-bottom:24px;">
+                <div class="card sw-card strength animate-fade-up" style="animation-delay:0.4s;">
+                    <div class="section-title" style="color:var(--accent-green);">
+                        <div class="section-icon" style="background:rgba(16,185,129,0.15);">💪</div>
+                        Strengths
+                    </div>
+                    <div id="strengthsList">
+                        <p style="color:var(--text-muted);font-size:0.88rem;">No clear strengths yet — keep practicing!
+                        </p>
+                    </div>
+                </div>
+                <div class="card sw-card weakness animate-fade-up" style="animation-delay:0.45s;">
+                    <div class="section-title" style="color:var(--accent-red);">
+                        <div class="section-icon" style="background:rgba(244,63,94,0.12);">📌</div>
+                        Areas to Improve
+                    </div>
+                    <div id="weaknessesList">
+                        <p style="color:var(--text-muted);font-size:0.88rem;">Great job! No significant weaknesses
+                            identified.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="card animate-fade-up" style="margin-bottom:24px;animation-delay:0.5s;">
+                <div class="section-title">
+                    <div class="section-icon" style="background:rgba(99,102,241,0.15);">💡</div>
+                    Personalized Recommendations
+                </div>
+                <ul class="rec-list" id="recList"></ul>
+            </div>
+
+            <!-- Response History -->
+            <div class="card animate-fade-up" style="animation-delay:0.55s;">
+                <div class="section-title">
+                    <div class="section-icon" style="background:rgba(245,158,11,0.15);">📝</div>
+                    Response History
+                </div>
+                <div id="responseHistory" style="max-height:360px;overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/questionBank.js"></script>
+    <script src="js/adaptiveEngine.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const raw = localStorage.getItem('currentSession');
+            if (!raw) { window.location.href = 'index.html'; return; }
+            const session = JSON.parse(raw);
+
+            setTimeout(() => {
+                document.getElementById('loadingReport').style.display = 'none';
+                document.getElementById('mainReport').style.display = 'block';
+                renderReport(session);
+            }, 600);
+        });
+
+        function renderReport(session) {
+            const profile = AdaptiveEngine.generateProfile(
+                session.globalTheta, session.topicThetas, session.responses
+            );
+
+            // ── Score Hero ──
+            document.getElementById('bigScore').textContent = profile.globalTheta.toFixed(2);
+            document.getElementById('ciRange').textContent =
+                `95% CI: [${profile.ciLow}, ${profile.ciHigh}] — SE: ${profile.seTheta}`;
+
+            const badge = document.getElementById('masteryBadge');
+            badge.textContent = profile.globalMastery.label;
+            badge.style.background = profile.globalMastery.color + '22';
+            badge.style.border = `1px solid ${profile.globalMastery.color}55`;
+            badge.style.color = profile.globalMastery.color;
+
+            const dur = session.endTime && session.startTime
+                ? Math.round((new Date(session.endTime) - new Date(session.startTime)) / 60000)
+                : '—';
+            document.getElementById('studentMeta').innerHTML =
+                `<strong>${session.name}</strong> &nbsp;|&nbsp; ${session.grade || 'Grade N/A'} &nbsp;|&nbsp; ${session.id} &nbsp;|&nbsp; Duration: ${dur} min`;
+
+            document.getElementById('statQuestions').textContent = profile.totalQuestions;
+            document.getElementById('statCorrect').textContent = profile.correct;
+            document.getElementById('statAccuracy').textContent = profile.accuracy + '%';
+            document.getElementById('statSE').textContent = profile.seTheta;
+
+            // ── Topic Mastery List ──
+            const tmList = document.getElementById('topicMasteryList');
+            profile.topicProfiles.forEach(tp => {
+                const row = document.createElement('div');
+                row.className = 'topic-row';
+                const thetaNorm = ((tp.theta + 4) / 8) * 100;
+                row.innerHTML = `
+          <div style="flex:1;">
+            <div class="topic-name" style="color:${TOPIC_COLORS[tp.topic]}">${tp.topic}</div>
+            <div class="topic-subtexts">${tp.questionsAsked} questions · ${tp.correctAnswers} correct · ${tp.accuracy}% accuracy</div>
+            <div class="mastery-bar-track" style="margin-top:8px;">
+              <div class="mastery-bar-fill" style="width:${thetaNorm}%;background:${tp.mastery.color};"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;">
+              <span style="font-size:0.68rem;color:var(--text-muted);">θ = ${tp.theta}</span>
+              <span style="font-size:0.68rem;color:var(--text-muted);">−4 ........................ +4</span>
+            </div>
+          </div>
+          <div>
+            <span class="mastery-chip" style="background:${tp.mastery.color}22;color:${tp.mastery.color};border:1px solid ${tp.mastery.color}44;">
+              ${tp.mastery.label}
+            </span>
+          </div>`;
+                tmList.appendChild(row);
+            });
+
+            // ── Strengths & Weaknesses ──
+            if (profile.strengths.length > 0) {
+                document.getElementById('strengthsList').innerHTML = profile.strengths.map(s => `
+          <div class="sw-item">
+            <div class="sw-dot" style="background:${TOPIC_COLORS[s.topic]};"></div>
+            <div>
+              <div style="font-weight:600;font-size:0.92rem;">${s.topic}</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">θ = ${s.theta} · ${s.mastery.label}</div>
+            </div>
+          </div>`).join('');
+            }
+            if (profile.weaknesses.length > 0) {
+                document.getElementById('weaknessesList').innerHTML = profile.weaknesses.map(w => `
+          <div class="sw-item">
+            <div class="sw-dot" style="background:${w.mastery.color};"></div>
+            <div>
+              <div style="font-weight:600;font-size:0.92rem;">${w.topic}</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">θ = ${w.theta} · ${w.mastery.label}</div>
+            </div>
+          </div>`).join('');
+            }
+
+            // ── Recommendations ──
+            const recs = [];
+            profile.weaknesses.forEach(w => recs.push(`Review foundational concepts in <strong>${w.topic}</strong> (current level: ${w.mastery.label}).`));
+            profile.developing.forEach(d => recs.push(`Practice intermediate problems in <strong>${d.topic}</strong> to reach Proficient level.`));
+            profile.strengths.forEach(s => recs.push(`Challenge yourself with Advanced ${s.topic} problems to push your ability higher.`));
+            if (recs.length === 0) recs.push('Your overall performance is strong. Explore advanced topics and timed practice sessions.');
+            recs.push('Review all incorrect answers above and study the provided explanations carefully.');
+            recs.push('Re-take the assessment after 2 weeks of focused study to track your improvement.');
+            document.getElementById('recList').innerHTML = recs.map(r => `<li>${r}</li>`).join('');
+
+            // ── Response History ──
+            const hist = document.getElementById('responseHistory');
+            session.responses.forEach((r, i) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'border-bottom:1px solid var(--border);padding:12px 0;';
+                const color = TOPIC_COLORS[r.question.topic] || '#6366f1';
+                item.innerHTML = `
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:${r.correct ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.15)'};
+                        color:${r.correct ? '#34d399' : '#fb7185'};display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">
+              ${r.correct ? '✓' : '✗'}
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:0.82rem;color:${color};font-weight:600;">${r.question.topic} · ${r.question.subtopic}</div>
+              <div style="font-size:0.88rem;margin:4px 0;">${r.question.text}</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">
+                Your answer: ${r.selectedOption >= 0 ? r.question.options[r.selectedOption] : 'Timed out'} &nbsp;|&nbsp;
+                Correct: ${r.question.options[r.question.correct]}
+              </div>
+              ${!r.correct && r.question.explanation ? `<div style="font-size:0.78rem;color:#a5b4fc;margin-top:3px;">💡 ${r.question.explanation}</div>` : ''}
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;">b=${r.question.b}</div>
+          </div>`;
+                hist.appendChild(item);
+            });
+
+            // ── Bar Chart ──
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: profile.topicProfiles.map(t => t.topic),
+                    datasets: [{
+                        label: 'θ (Ability)',
+                        data: profile.topicProfiles.map(t => t.theta),
+                        backgroundColor: profile.topicProfiles.map(t => TOPIC_COLORS[t.topic] + 'bb'),
+                        borderColor: profile.topicProfiles.map(t => TOPIC_COLORS[t.topic]),
+                        borderWidth: 2, borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` θ = ${c.raw.toFixed(3)}` } } },
+                    scales: {
+                        y: { min: -4, max: 4, ticks: { color: '#8b8fa8', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { ticks: { color: '#8b8fa8', font: { size: 11 } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // ── Radar Chart ──
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: profile.topicProfiles.map(t => t.topic),
+                    datasets: [{
+                        label: 'Ability',
+                        data: profile.topicProfiles.map(t => Math.max(0, (t.theta + 4) / 8 * 100)),
+                        backgroundColor: 'rgba(99,102,241,0.15)',
+                        borderColor: '#6366f1',
+                        pointBackgroundColor: profile.topicProfiles.map(t => TOPIC_COLORS[t.topic]),
+                        pointRadius: 5, borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            min: 0, max: 100,
+                            ticks: { color: '#8b8fa8', font: { size: 10 }, stepSize: 25 },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            pointLabels: { color: '#c4c6d8', font: { size: 12, weight: '600' } },
+                            angleLines: { color: 'rgba(255,255,255,0.06)' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdaptIQ – Adaptive Online Assessment Platform</title>
+  <meta name="description" content="AI-powered adaptive testing platform that personalizes assessment difficulty in real-time based on your performance." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Landing-specific styles ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 100px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.3);
+      font-size: 0.82rem; font-weight: 600; color: #a5b4fc;
+      margin-bottom: 32px;
+      animation: fade-up 0.5s ease forwards;
+    }
+    .hero-title {
+      max-width: 780px;
+      animation: fade-up 0.6s 0.1s ease both;
+    }
+    .hero-sub {
+      max-width: 540px;
+      font-size: 1.1rem; line-height: 1.7;
+      margin: 20px 0 48px;
+      color: var(--text-secondary);
+      animation: fade-up 0.6s 0.2s ease both;
+    }
+    .role-cards {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 20px; max-width: 600px; width: 100%;
+      animation: fade-up 0.6s 0.3s ease both;
+    }
+    @media (max-width: 500px) { .role-cards { grid-template-columns: 1fr; } }
+    .role-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .role-card:hover {
+      border-color: var(--accent-purple);
+      background: rgba(99,102,241,0.08);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(99,102,241,0.2);
+    }
+    .role-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; margin: 0 auto 16px;
+    }
+    .role-card h3 { margin-bottom: 8px; }
+    .role-card p { font-size: 0.88rem; }
+
+    /* ── Login Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #13131e;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      width: 100%; max-width: 420px;
+      transform: scale(0.95); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+    .modal-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 20px; }
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+    .error-msg { color: var(--accent-red); font-size: 0.83rem; margin-top: 6px; display: none; }
+
+    /* ── Features Row ── */
+    .features {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+      max-width: 900px; width: 100%;
+      margin-top: 80px;
+      animation: fade-up 0.6s 0.5s ease both;
+    }
+    @media (max-width: 700px) { .features { grid-template-columns: 1fr; } }
+    .feature {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px;
+      transition: border-color 0.3s;
+    }
+    .feature:hover { border-color: rgba(99,102,241,0.4); }
+    .feature-emoji { font-size: 1.8rem; margin-bottom: 12px; }
+    .feature h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .feature p { font-size: 0.83rem; }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">AdaptIQ</a>
+      <div class="flex gap-8">
+        <span class="badge" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;font-size:0.75rem;">
+          <span style="width:6px;height:6px;background:#34d399;border-radius:50%;display:inline-block;"></span>
+          Live
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="hero">
+    <div class="z-1">
+      <div class="hero-tag">
+        🎯 Powered by Item Response Theory (IRT)
+      </div>
+      <h1 class="hero-title">
+        <span class="grad-text">Adaptive Assessment</span><br/>that learns as you answer
+      </h1>
+      <p class="hero-sub">
+        Real-time difficulty adjustment, Bayesian ability estimation, and
+        personalized competency profiles — all in your browser.
+      </p>
+
+      <div class="role-cards">
+        <!-- Student -->
+        <div class="role-card" onclick="openModal('student')">
+          <div class="role-icon" style="background:rgba(99,102,241,0.15);">🎓</div>
+          <h3>I'm a Student</h3>
+          <p>Take an adaptive assessment tailored to your ability level.</p>
+          <br/>
+          <div class="btn btn-primary btn-full" style="pointer-events:none;margin-top:4px;">Start Test →</div>
+        </div>
+        <!-- Instructor -->
+        <div class="role-card" onclick="openModal('instructor')">
+          <div class="role-icon" style="background:rgba(34,211,238,0.12);">📊</div>
+          <h3>I'm an Instructor</h3>
+          <p>View class performance, analytics, and student competency reports.</p>
+          <br/>
+          <div class="btn btn-secondary btn-full" style="pointer-events:none;margin-top:4px;">Dashboard →</div>
+        </div>
+      </div>
+
+      <!-- Feature Highlights -->
+      <div class="features">
+        <div class="feature">
+          <div class="feature-emoji">🧠</div>
+          <h4>3PL IRT Engine</h4>
+          <p>Three-parameter logistic model with Fisher information-based question selection.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-emoji">⚖️</div>
+          <h4>Bayesian Estimation</h4>
+          <p>EAP ability estimates updated after every response with normal prior.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-emoji">📈</div>
+          <h4>Competency Profiles</h4>
+          <p>Topic-wise mastery levels, strengths, weaknesses, and radar charts.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Student Modal -->
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal">
+      <div class="modal-icon" style="background:rgba(99,102,241,0.15);">🎓</div>
+      <h2 style="margin-bottom:8px;">Student Login</h2>
+      <p style="margin-bottom:28px;font-size:0.9rem;">Enter your details to begin your adaptive assessment session.</p>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input id="studentName" class="input" type="text" placeholder="e.g. Priya Sharma" autocomplete="off" />
+        <div class="error-msg" id="nameError">Please enter your name.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Student ID <span style="color:var(--text-muted)">(optional)</span></label>
+        <input id="studentId" class="input" type="text" placeholder="e.g. STU2024001" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grade / Year</label>
+        <select id="studentGrade" class="input" style="appearance:none;">
+          <option value="">Select Grade</option>
+          <option value="grade8">Grade 8</option>
+          <option value="grade9">Grade 9</option>
+          <option value="grade10">Grade 10</option>
+          <option value="grade11">Grade 11</option>
+          <option value="grade12">Grade 12</option>
+          <option value="undergrad">Undergraduate</option>
+          <option value="postgrad">Postgraduate</option>
+        </select>
+      </div>
+      <div class="flex gap-12" style="margin-top:8px;">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeModal('student')">Cancel</button>
+        <button class="btn btn-primary" style="flex:2" id="startTestBtn" onclick="startStudentSession()">Begin Assessment →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructor Modal -->
+  <div class="modal-overlay" id="instructorModal">
+    <div class="modal">
+      <div class="modal-icon" style="background:rgba(34,211,238,0.12);">📊</div>
+      <h2 style="margin-bottom:8px;">Instructor Access</h2>
+      <p style="margin-bottom:28px;font-size:0.9rem;">Enter your name to access the class analytics dashboard.</p>
+      <div class="form-group">
+        <label class="form-label">Instructor Name</label>
+        <input id="instructorName" class="input" type="text" placeholder="e.g. Dr. Akash Mehta" autocomplete="off" />
+        <div class="error-msg" id="instError">Please enter your name.</div>
+      </div>
+      <div class="flex gap-12" style="margin-top:8px;">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeModal('instructor')">Cancel</button>
+        <button class="btn btn-success" style="flex:2" onclick="goInstructor()">Open Dashboard →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(role) {
+      document.getElementById(role === 'student' ? 'studentModal' : 'instructorModal').classList.add('open');
+    }
+    function closeModal(role) {
+      document.getElementById(role === 'student' ? 'studentModal' : 'instructorModal').classList.remove('open');
+    }
+    // Close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
+
+    function startStudentSession() {
+      const name = document.getElementById('studentName').value.trim();
+      const err  = document.getElementById('nameError');
+      if (!name) { err.style.display = 'block'; return; }
+      err.style.display = 'none';
+
+      const session = {
+        name,
+        id: document.getElementById('studentId').value.trim() || 'STU' + Date.now(),
+        grade: document.getElementById('studentGrade').value,
+        startTime: new Date().toISOString(),
+        responses: [],
+        usedIds: [],
+        globalTheta: 0,
+        topicThetas: {},
+        seTheta: 999,
+        questionCount: 0,
+        completed: false
+      };
+      localStorage.setItem('currentSession', JSON.stringify(session));
+      window.location.href = 'student.html';
+    }
+
+    function goInstructor() {
+      const name = document.getElementById('instructorName').value.trim();
+      const err  = document.getElementById('instError');
+      if (!name) { err.style.display = 'block'; return; }
+      err.style.display = 'none';
+      localStorage.setItem('instructorName', name);
+      window.location.href = 'instructor.html';
+    }
+
+    // Enter key shortcut
+    document.getElementById('studentName').addEventListener('keydown', e => { if (e.key==='Enter') startStudentSession(); });
+    document.getElementById('instructorName').addEventListener('keydown', e => { if (e.key==='Enter') goInstructor(); });
+  </script>
+</body>
+</html>
