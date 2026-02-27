@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdaptIQ – Dashboard</title>
+  <link rel="stylesheet" href="css/style1.css" />
+  <style>
+    /* ===== Full cyberpunk styles (unchanged) ===== */
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 80px;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-primary);
+      padding: 24px 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .sidebar-item {
+      padding: 12px 16px;
+      margin: 4px 0;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid transparent;
+    }
+
+    .sidebar-item:hover,
+    .sidebar-item.active {
+      background: rgba(0, 255, 255, 0.1);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+
+    .user-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--neon-magenta);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 0 20px var(--neon-magenta);
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 2px solid var(--neon-cyan);
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      color: var(--neon-cyan);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(0, 255, 255, 0.2);
+      box-shadow: 0 0 20px var(--neon-cyan);
+    }
+
+    .welcome-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--neon-cyan), var(--neon-magenta));
+      opacity: 0.2;
+      z-index: -1;
+    }
+
+    .menu-dropdown {
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--neon-cyan);
+      border-radius: var(--radius-lg);
+      padding: 0.5rem 0;
+      display: none;
+      flex-direction: column;
+      min-width: 180px;
+      z-index: 1000;
+    }
+
+    .menu-dropdown.show {
+      display: flex;
+    }
+
+    .menu-dropdown a {
+      padding: 0.75rem 1rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .menu-dropdown a:hover {
+      background: rgba(0, 255, 255, 0.2);
+      color: var(--neon-cyan);
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+
+    .progress-info {
+      flex: 1;
+    }
+
+    .progress-info .prog-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .timer-ring {
+      position: relative;
+      width: 72px;
+      height: 72px;
+    }
+
+    .timer-ring svg {
+      transform: rotate(-90deg);
+      filter: drop-shadow(0 0 10px var(--neon-cyan));
+    }
+
+    .timer-ring .track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 4;
+    }
+
+    .timer-ring .fill {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 201;
+      stroke-dashoffset: 0;
+    }
+
+    .timer-value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      text-shadow: 0 0 10px currentColor;
+    }
+
+    .theta-meter {
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.06);
+      position: relative;
+      overflow: visible;
+      margin-top: 4px;
+    }
+
+    .theta-indicator {
+      position: absolute;
+      top: -5px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--neon-cyan);
+      border: 2px solid var(--bg-primary);
+      transform: translateX(-50%);
+      transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 8px var(--neon-cyan);
+    }
+
+    .theta-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .theta-ticks span {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .question-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-xl);
+      padding: 36px 40px;
+      backdrop-filter: blur(16px);
+      transition: all 0.4s ease;
+    }
+
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .q-number {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .topic-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .topic-pill {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .q-text {
+      font-size: 1.12rem;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 16px 24px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      transform: translateX(5px);
+    }
+
+    .option-btn.selected {
+      border-color: var(--neon-magenta);
+      box-shadow: 0 0 30px rgba(255, 0, 255, 0.4);
+      background: rgba(255, 0, 255, 0.1);
+    }
+
+    .option-btn.correct {
+      border-color: var(--neon-green);
+      background: rgba(0, 255, 157, 0.1);
+    }
+
+    .option-btn.wrong {
+      border-color: var(--neon-red);
+      background: rgba(255, 0, 85, 0.1);
+    }
+
+    .opt-letter {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid currentColor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+
+    .feedback-banner {
+      display: none;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .feedback-banner.correct {
+      background: rgba(0, 255, 157, 0.15);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+    }
+
+    .feedback-banner.wrong {
+      background: rgba(255, 0, 85, 0.15);
+      border: 1px solid var(--neon-red);
+      color: var(--neon-red);
+    }
+
+    .explanation-text {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid var(--neon-cyan);
+      border-radius: 4px;
+    }
+
+    .bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .ability-display {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: 10px 20px;
+    }
+
+    .ability-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .ability-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .btn {
+      margin-left: auto;
+    }
+
+    #nextBtnWrap {
+      text-align: right;
+      margin-top: 16px;
+    }
+
+    .ai-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #ff00ff, #00ffff);
+      border-radius: 100px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.85rem;
+      color: black;
+      box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+      animation: ai-pulse 2s infinite ease-in-out;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes ai-pulse {
+      0% {
+        box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+        transform: scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 30px #ff00ff, 0 0 40px #00ffff;
+        transform: scale(1.05);
+      }
+
+      100% {
+        box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+        transform: scale(1);
+      }
+    }
+
+    .start-test-area {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--bg-card);
+      border: 2px dashed var(--neon-cyan);
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .start-test-area:hover {
+      border-color: var(--neon-magenta);
+      box-shadow: 0 0 40px rgba(255, 0, 255, 0.3);
+    }
+
+    .start-test-btn {
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff00ff, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="scanline"></div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">AdaptIQ</a>
+      <div class="flex gap-8">
+        <div id="menuIcon" style="cursor:pointer; font-size:1.8rem; color:var(--neon-cyan);">☰</div>
+      </div>
+    </div>
+    <div id="roleMenu" class="menu-dropdown">
+      <a href="instructor.html">Instructor Dashboard</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+  </header>
+
+  <div class="dashboard">
+    <div class="sidebar">
+      <div class="sidebar-item active" data-topic="general">📝 General</div>
+      <div class="sidebar-item" data-topic="physics">⚛️ Physics</div>
+      <div class="sidebar-item" data-topic="math">🧮 Mathematics</div>
+      <div class="sidebar-item" data-topic="chemistry">🧪 Chemistry</div>
+      <div class="sidebar-item" data-topic="history">📜 History</div>
+      <div class="sidebar-item" data-topic="literature">📚 Literature</div>
+    </div>
+
+    <div class="main-content">
+      <div class="user-header">
+        <div class="ai-badge">📚 50+ LOCAL QUESTIONS</div>
+        <span id="greeting"></span>
+        <span id="userNameDisplay"></span>
+        <div id="userAvatar" class="user-avatar"></div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+
+      <div class="welcome-card">
+        <h1 id="welcomeMessage">Loading...</h1>
+        <p style="color: var(--text-secondary);">10 adaptive questions – difficulty changes with your answers</p>
+      </div>
+
+      <div class="test-area" id="assessCard">
+        <div id="startTestContainer" class="start-test-area" onclick="startTest()">
+          <div class="start-test-btn">▶ START TEST</div>
+          <p style="color: var(--text-muted);">Click to begin</p>
+        </div>
+
+        <div id="assessmentContent" style="display: none;">
+          <div class="top-bar">
+            <div class="progress-info">
+              <div class="prog-label">
+                <span>Progress</span>
+                <span id="progText">Question 1 of 10</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="timer-ring">
+              <svg width="72" height="72" viewBox="0 0 72 72">
+                <circle class="track" cx="36" cy="36" r="32" />
+                <circle class="fill" id="timerCircle" cx="36" cy="36" r="32" stroke="#00ffff" stroke-dasharray="201"
+                  stroke-dashoffset="0" />
+              </svg>
+              <div class="timer-value" id="timerVal">60</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-size:0.75rem; color:var(--text-muted);">Estimated Ability (θ)</span>
+              <span class="badge badge-cyan" id="thetaLabel">θ = 0.000</span>
+            </div>
+            <div class="theta-meter">
+              <div class="theta-indicator" id="thetaIndicator" style="left:50%;"></div>
+            </div>
+            <div class="theta-ticks">
+              <span>−4</span><span>−2</span><span>0</span><span>+2</span><span>+4</span>
+            </div>
+          </div>
+
+          <div class="question-card" id="questionCard">
+            <div class="q-header">
+              <div class="q-meta">
+                <div class="q-number" id="qNumber">Question 1</div>
+                <div class="topic-tags" id="topicTags"></div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.72rem; color:var(--text-muted);">Difficulty</div>
+                <div id="difficultyDisplay" style="font-size:0.88rem; font-weight:600;">—</div>
+              </div>
+            </div>
+            <p class="q-text" id="qText">Loading…</p>
+            <div class="options-grid" id="optionsGrid"></div>
+
+            <div class="feedback-banner" id="feedbackBanner">
+              <span id="feedbackIcon"></span> <span id="feedbackText"></span>
+              <div class="explanation-text" id="explanationText"></div>
+            </div>
+
+            <div class="bottom-row">
+              <div class="ability-display">
+                <div>
+                  <div class="ability-label">Global θ</div>
+                  <div class="ability-value grad-text-cyber" id="abilityVal">0.000</div>
+                </div>
+                <div style="width:1px; height:32px; background:var(--border-primary);"></div>
+                <div>
+                  <div class="ability-label">Topic θ</div>
+                  <div class="ability-value" id="topicAbilityVal" style="color:var(--neon-magenta);">0.000</div>
+                </div>
+              </div>
+              <button id="submitBtn" class="btn btn-primary" onclick="submitAnswer()" disabled>Confirm Answer</button>
+            </div>
+          </div>
+
+          <div style="text-align:right; margin-top:16px; display:none;" id="nextBtnWrap">
+            <button class="btn btn-primary" id="nextBtn" onclick="loadNextQuestion()">Next Question →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1wU1fyWECpkTXprHwDEUUs8YraFFdiHk",
+      authDomain: "college-website-e4684.firebaseapp.com",
+      projectId: "college-website-e4684",
+      storageBucket: "college-website-e4684.firebasestorage.app",
+      messagingSenderId: "860004770297",
+      appId: "1:860004770297:web:1550b244e4af7c74901d28",
+      measurementId: "G-G0YN0KDJ67"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Menu toggle
+    const menuIcon = document.getElementById('menuIcon');
+    const roleMenu = document.getElementById('roleMenu');
+    menuIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      roleMenu.classList.toggle('show');
+    });
+    document.addEventListener('click', () => roleMenu.classList.remove('show'));
+
+    // Assessment state
+    let session = {
+      name: '', id: '', grade: '', responses: [], usedIds: [],
+      globalTheta: 0, topicThetas: {}, seTheta: 999,
+      questionCount: 0, completed: false, currentTopic: 'general', startTime: null
+    };
+    let currentQuestion = null;
+    let selectedOption = null;
+    let answered = false;
+    let timerInterval = null;
+    let timeLeft = 60;
+    const MAX_QUESTIONS = 10;
+
+    // ==================== LOCAL QUESTION BANK ====================
+    // Difficulty: 0 = Easy, 1 = Medium, 2 = Hard
+    const QUESTION_BANK = {
+      general: [
+        { question: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], correctIndex: 0, explanation: "Paris is not only the capital but also the most populous city of France. It has been one of Europe's major centers of finance, diplomacy, commerce, fashion, gastronomy, and science.", difficulty: 0 },
+        { question: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Saturn"], correctIndex: 1, explanation: "Mars is often referred to as the 'Red Planet' because the iron oxide (rust) prevalent on its surface gives it a reddish appearance that is distinctive among the astronomical bodies visible to the naked eye.", difficulty: 0 },
+        { question: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correctIndex: 3, explanation: "The Pacific Ocean is the largest and deepest of Earth's five oceanic divisions. It extends from the Arctic Ocean in the north to the Southern Ocean in the south.", difficulty: 0 },
+        { question: "Who wrote 'Hamlet'?", options: ["Dickens", "Shakespeare", "Hemingway", "Tolkien"], correctIndex: 1, explanation: "William Shakespeare wrote Hamlet, a tragedy believed to have been written between 1599 and 1601. It is Shakespeare's longest play and considered among the most powerful and influential works of world literature.", difficulty: 1 },
+        { question: "What is the chemical symbol for gold?", options: ["Go", "Gd", "Au", "Ag"], correctIndex: 2, explanation: "The chemical symbol for gold is 'Au', which derived from the Latin word 'aurum', meaning 'shining dawn' or 'glow of sunrise'.", difficulty: 1 },
+        { question: "How many continents are there?", options: ["5", "6", "7", "8"], correctIndex: 2, explanation: "By the most widely accepted standard, there are seven continents on Earth: Africa, Antarctica, Asia, Australia/Oceania, Europe, North America, and South America.", difficulty: 0 },
+        { question: "What is the square root of 144?", options: ["10", "11", "12", "13"], correctIndex: 2, explanation: "The square root of 144 is 12, because 12 multiplied by itself (12 × 12) exactly equals 144.", difficulty: 0 },
+        { question: "Which gas do plants absorb from the atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correctIndex: 1, explanation: "Plants absorb carbon dioxide (CO2) from the atmosphere during photosynthesis, using it along with water and sunlight to produce oxygen and energy in the form of sugar.", difficulty: 1 },
+        { question: "Who is known as the father of computers?", options: ["Bill Gates", "Alan Turing", "Charles Babbage", "Steve Jobs"], correctIndex: 2, explanation: "Charles Babbage, an English polymath, is considered the 'father of computers' for inventing the first mechanical computer, the Difference Engine, and conceptualizing the Analytical Engine.", difficulty: 2 },
+        { question: "What is the hardest natural substance?", options: ["Iron", "Diamond", "Platinum", "Steel"], correctIndex: 1, explanation: "Diamond is the hardest known natural substance. Its extraordinary hardness is due to its highly rigid lattice structure, where each carbon atom is covalently bonded to four others.", difficulty: 1 },
+        { question: "What is the tallest mountain on Earth?", options: ["K2", "Mount Everest", "Kangchenjunga", "Lhotse"], correctIndex: 1, explanation: "Mount Everest is Earth's highest mountain above sea level, located in the Mahalangur Himal sub-range of the Himalayas. Its official elevation is 8,848.86 meters (29,031.7 ft).", difficulty: 0 },
+        { question: "Which country is known as the Land of the Rising Sun?", options: ["China", "Japan", "Thailand", "South Korea"], correctIndex: 1, explanation: "Japan is frequently called the 'Land of the Rising Sun'. The name originates from the Chinese perspective, as Japan lies to the east of China, where the sun appears to rise.", difficulty: 0 }
+      ],
+      physics: [
+        { question: "What is the SI unit of force?", options: ["Newton", "Joule", "Watt", "Pascal"], correctIndex: 0, explanation: "The newton (symbol: N) is the SI derived unit of force, named after Isaac Newton in recognition of his work on classical mechanics.", difficulty: 0 },
+        { question: "What is the speed of light in vacuum (approx)?", options: ["300,000 km/s", "150,000 km/s", "1,000 km/s", "3,000 km/s"], correctIndex: 0, explanation: "The speed of light in vacuum is exactly 299,792,458 metres per second (approx 300,000 km/s). It is a universal physical constant important in many areas of physics.", difficulty: 1 },
+        { question: "Which law states that for every action there is an equal and opposite reaction?", options: ["Newton's First", "Newton's Second", "Newton's Third", "Law of Gravitation"], correctIndex: 2, explanation: "Newton's third law of motion states that when two bodies interact, they apply forces to one another that are equal in magnitude and opposite in direction.", difficulty: 0 },
+        { question: "What is the unit of electrical resistance?", options: ["Volt", "Ampere", "Ohm", "Watt"], correctIndex: 2, explanation: "The ohm (symbol: Ω) is the SI derived unit of electrical resistance, named after German physicist Georg Simon Ohm.", difficulty: 1 },
+        { question: "Which particle has a negative charge?", options: ["Proton", "Neutron", "Electron", "Photon"], correctIndex: 2, explanation: "The electron is a subatomic particle with a negative one elementary electric charge. For comparison, protons are positive, and neutrons are neutral.", difficulty: 0 },
+        { question: "What is the atomic number of carbon?", options: ["4", "6", "8", "12"], correctIndex: 1, explanation: "Carbon has an atomic number of 6, which means every carbon atom possesses exactly 6 protons in its nucleus.", difficulty: 0 },
+        { question: "Which force keeps planets in orbit around the sun?", options: ["Electromagnetism", "Gravity", "Nuclear", "Friction"], correctIndex: 1, explanation: "Gravity is the fundamental interaction which causes mutual attraction between all things that have mass or energy, keeping planets from flying off into space.", difficulty: 1 },
+        { question: "What is the formula for kinetic energy?", options: ["mv²/2", "mgh", "ma", "Fd"], correctIndex: 0, explanation: "Kinetic energy (½ mv²) is the energy that it possesses due to its motion. It depends on both the mass (m) and the square of its velocity (v²).", difficulty: 2 },
+        { question: "What is the unit of frequency?", options: ["Hertz", "Decibel", "Meter", "Second"], correctIndex: 0, explanation: "The hertz (symbol: Hz) is the unit of frequency in the International System of Units (SI), defined as one cycle or oscillation per second.", difficulty: 0 },
+        { question: "Which type of wave is light?", options: ["Transverse", "Longitudinal", "Surface", "Tidal"], correctIndex: 0, explanation: "Light is a transverse electromagnetic wave, meaning its electric and magnetic fields oscillate perpendicular to the direction in which the wave travels.", difficulty: 1 },
+        { question: "What is the acceleration due to gravity on Earth (approx)?", options: ["9.8 m/s²", "10 m/s²", "8.9 m/s²", "9.1 m/s²"], correctIndex: 0, explanation: "Standard gravity on Earth is broadly defined as 9.80665 m/s². In most scientific contexts, 9.8 or 9.81 m/s² is used for calculations near the surface.", difficulty: 1 },
+        { question: "Who developed the theory of relativity?", options: ["Newton", "Einstein", "Galileo", "Hawking"], correctIndex: 1, explanation: "Albert Einstein published the special theory of relativity in 1905 and the general theory of relativity in 1915.", difficulty: 1 }
+      ],
+      math: [
+        { question: "What is the derivative of x²?", options: ["x", "2x", "2", "x²"], correctIndex: 1, explanation: "Using the power rule in calculus, the derivative of x^n is n*x^(n-1). Therefore, the derivative of x² is 2x.", difficulty: 1 },
+        { question: "Solve for x: 2x + 5 = 15", options: ["5", "10", "7.5", "5.5"], correctIndex: 0, explanation: "Subtract 5 from both sides to get 2x = 10. Divide by 2 to isolate x, resulting in x = 5.", difficulty: 0 },
+        { question: "What is the value of π (pi) approximately?", options: ["3.14", "2.71", "1.62", "4.20"], correctIndex: 0, explanation: "Pi is an irrational number that represents the ratio of a circle's circumference to its diameter, commonly approximated as 3.14159.", difficulty: 0 },
+        { question: "What is the integral of 2x dx?", options: ["x² + C", "2x² + C", "x²/2 + C", "2 + C"], correctIndex: 0, explanation: "Using the reverse power rule, ∫2x dx = (2x²)/2 + C, which simplifies to x² + C, where C is the constant of integration.", difficulty: 2 },
+        { question: "What is the square root of 169?", options: ["12", "13", "14", "15"], correctIndex: 1, explanation: "The square root of a number is a value that, when multiplied by itself, gives the original number. Since 13 × 13 = 169, the answer is 13.", difficulty: 0 },
+        { question: "If a circle has radius 5, what is its area?", options: ["25π", "10π", "5π", "20π"], correctIndex: 0, explanation: "The formula for the area of a circle is A = πr². Substituting 5 for r gives A = π(5)² = 25π.", difficulty: 1 },
+        { question: "What is the slope of the line y = 3x + 2?", options: ["2", "3", "1", "0"], correctIndex: 1, explanation: "In the slope-intercept form of a linear equation (y = mx + b), 'm' represents the slope. Here, the coefficient of x is 3.", difficulty: 0 },
+        { question: "Solve the quadratic: x² - 5x + 6 = 0", options: ["x=2,3", "x=1,6", "x= -2,-3", "x= 5,1"], correctIndex: 0, explanation: "Factoring the quadratic equation gives (x-2)(x-3) = 0. Setting each factor to zero yields the roots x = 2 and x = 3.", difficulty: 1 },
+        { question: "What is the cosine of 0°?", options: ["0", "1", "-1", "undefined"], correctIndex: 1, explanation: "In trigonometry, the cosine of an angle of 0 degrees corresponds to the x-coordinate of the unit circle at that angle, which is 1.", difficulty: 1 },
+        { question: "What is the limit of 1/x as x approaches infinity?", options: ["0", "1", "∞", "undefined"], correctIndex: 0, explanation: "As the denominator x grows infinitely large, the overall fraction 1/x becomes infinitesimally small, approaching the limit of 0.", difficulty: 2 },
+        { question: "What is the value of 5! (5 factorial)?", options: ["15", "25", "120", "60"], correctIndex: 2, explanation: "The factorial of a non-negative integer n, denoted by n!, is the product of all positive integers less than or equal to n. 5! = 5×4×3×2×1 = 120.", difficulty: 0 },
+        { question: "If f(x) = 3x², what is f'(x)?", options: ["6x", "3x", "x²", "6"], correctIndex: 0, explanation: "Using the power rule [d/dx(cx^n) = c*n*x^(n-1)], the derivative f'(x) is 3 * 2 * x^(2-1), which simplifies to 6x.", difficulty: 1 }
+      ],
+      chemistry: [
+        { question: "What is the chemical symbol for water?", options: ["H2O", "CO2", "O2", "NaCl"], correctIndex: 0, explanation: "H2O is the chemical shorthand for water, indicating that each molecule comprises two hydrogen atoms and one oxygen atom.", difficulty: 0 },
+        { question: "What is the pH of pure water?", options: ["0", "7", "14", "10"], correctIndex: 1, explanation: "The pH scale measures how acidic or basic a substance is. Pure water is completely neutral, which corresponds to exactly 7 on the pH scale at 25°C.", difficulty: 0 },
+        { question: "What is the chemical formula for table salt?", options: ["KCl", "NaCl", "CaCO3", "H2SO4"], correctIndex: 1, explanation: "Table salt is composed of sodium and chloride ions. Its chemical formula is NaCl, representing sodium chloride.", difficulty: 1 },
+        { question: "Which gas makes up most of Earth's atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Argon"], correctIndex: 2, explanation: "Nitrogen gas (N2) is the most abundant element in Earth's atmosphere, making up approximately 78% of the volume.", difficulty: 1 },
+        { question: "What is the atomic number of oxygen?", options: ["6", "8", "10", "16"], correctIndex: 1, explanation: "Oxygen's atomic number is 8. This value represents the invariant number of protons found in the nucleus of every oxygen atom.", difficulty: 1 },
+        { question: "What is the most abundant element in the universe?", options: ["Oxygen", "Carbon", "Hydrogen", "Helium"], correctIndex: 2, explanation: "Hydrogen is the lightest and most abundant element in the observable universe, accounting for roughly 75% of all normal matter.", difficulty: 2 },
+        { question: "What is the chemical symbol for iron?", options: ["Ir", "Fe", "In", "Io"], correctIndex: 1, explanation: "The chemical symbol for iron is 'Fe', which is derived from its Latin name 'ferrum'.", difficulty: 1 },
+        { question: "Which acid is found in vinegar?", options: ["Citric acid", "Acetic acid", "Sulfuric acid", "Nitric acid"], correctIndex: 1, explanation: "Vinegar is essentially a dilute solution of acetic acid (CH3COOH) in water, which gives it its distinctive sour taste.", difficulty: 1 },
+        { question: "What is the formula for methane?", options: ["CH4", "C2H6", "CO2", "C6H12O6"], correctIndex: 0, explanation: "Methane is the simplest alkane and the main constituent of natural gas. Its molecular formula is CH4.", difficulty: 1 },
+        { question: "Which element has the symbol 'Na'?", options: ["Sodium", "Nitrogen", "Neon", "Nickel"], correctIndex: 0, explanation: "The symbol 'Na' stands for sodium. It originates from 'natrium', a Latinized version of the Egyptian word for a natural mineral salt.", difficulty: 0 }
+      ],
+      history: [
+        { question: "Who was the first President of the United States?", options: ["George Washington", "Thomas Jefferson", "Abraham Lincoln", "John Adams"], correctIndex: 0, explanation: "George Washington served as the first President of the United States from 1789 to 1797. He was unanimously elected by the Electoral College.", difficulty: 0 },
+        { question: "In which year did World War II end?", options: ["1944", "1945", "1946", "1947"], correctIndex: 1, explanation: "World War II officially ended in September 1945, after the formal surrender of Japan aboard the USS Missouri in Tokyo Bay.", difficulty: 1 },
+        { question: "Who discovered America in 1492?", options: ["Vasco da Gama", "Christopher Columbus", "Ferdinand Magellan", "Marco Polo"], correctIndex: 1, explanation: "While indigenous peoples had lived there for millennia, the Italian explorer Christopher Columbus famously reached the Americas in 1492 under the flag of Spain.", difficulty: 0 },
+        { question: "The Great Wall of China was built primarily to protect against which group?", options: ["Romans", "Mongols", "Japanese", "British"], correctIndex: 1, explanation: "Successive dynasties built and reinforced the Great Wall primarily as a defense mechanism against nomadic incursions, most notably the Mongol Empire.", difficulty: 1 },
+        { question: "Who was the first man to step on the moon?", options: ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Michael Collins"], correctIndex: 1, explanation: "Neil Armstrong became the first human to step on the lunar surface on July 20, 1969, during the Apollo 11 mission.", difficulty: 0 },
+        { question: "Which ancient civilization built Machu Picchu?", options: ["Aztec", "Maya", "Inca", "Olmec"], correctIndex: 2, explanation: "Machu Picchu is a historically significant 15th-century citadel located in the Andes Mountains in Peru, constructed by the Inca Empire.", difficulty: 1 },
+        { question: "Who painted the Mona Lisa?", options: ["Michelangelo", "Leonardo da Vinci", "Raphael", "Van Gogh"], correctIndex: 1, explanation: "Leonardo da Vinci, the archetype of the Renaissance Man, painted the Mona Lisa in the early 16th century.", difficulty: 1 },
+        { question: "In which year did the Berlin Wall fall?", options: ["1989", "1991", "1987", "1990"], correctIndex: 0, explanation: "The Berlin Wall fell on November 9, 1989, a pivotal moment marking the end of the Cold War division in Germany.", difficulty: 1 },
+        { question: "Who was the British Prime Minister during most of WWII?", options: ["Churchill", "Chamberlain", "Attlee", "Thatcher"], correctIndex: 0, explanation: "Winston Churchill served as Prime Minister of the United Kingdom from 1940 to 1945 (and again from 1951 to 1955), guiding the country to victory in WWII.", difficulty: 1 },
+        { question: "The Magna Carta was signed in which year?", options: ["1066", "1215", "1492", "1776"], correctIndex: 1, explanation: "The Magna Carta was a royal charter of rights agreed to by King John of England at Runnymede in 1215, laying modern foundations for the rule of law.", difficulty: 2 }
+      ],
+      literature: [
+        { question: "Who wrote '1984'?", options: ["Aldous Huxley", "George Orwell", "Ray Bradbury", "H.G. Wells"], correctIndex: 1, explanation: "George Orwell wrote the dystopian novel '1984', published in 1949 as a warning against totalitarian regimes and mass surveillance.", difficulty: 1 },
+        { question: "Which Shakespeare play features the character Hamlet?", options: ["Macbeth", "Othello", "Hamlet", "King Lear"], correctIndex: 2, explanation: "Prince Hamlet is the title character and protagonist of William Shakespeare's tragedy 'Hamlet'. He is tasked with avenging his father's murder.", difficulty: 0 },
+        { question: "Who is the author of the Harry Potter series?", options: ["J.R.R. Tolkien", "J.K. Rowling", "C.S. Lewis", "Stephen King"], correctIndex: 1, explanation: "British author J.K. Rowling wrote the immensely popular Harry Potter fantasy series detailing the adventures of a young wizard.", difficulty: 0 },
+        { question: "Which novel begins with 'Call me Ishmael'?", options: ["Moby Dick", "The Old Man and the Sea", "The Odyssey", "Treasure Island"], correctIndex: 0, explanation: "'Call me Ishmael' is the famous opening sentence of Moby-Dick, an 1851 novel by American writer Herman Melville.", difficulty: 2 },
+        { question: "Who wrote 'Pride and Prejudice'?", options: ["Jane Austen", "Emily Brontë", "Charles Dickens", "Mark Twain"], correctIndex: 0, explanation: "Jane Austen published 'Pride and Prejudice' anonymously in 1813. It remains one of the most beloved English novels of all time.", difficulty: 1 },
+        { question: "Which poet wrote 'The Raven'?", options: ["Edgar Allan Poe", "Robert Frost", "Emily Dickinson", "Walt Whitman"], correctIndex: 0, explanation: "Edgar Allan Poe is the author of 'The Raven', a narrative poem famous for its musicality, stylized language, and supernatural atmosphere.", difficulty: 1 },
+        { question: "Who is the author of 'The Great Gatsby'?", options: ["Ernest Hemingway", "F. Scott Fitzgerald", "John Steinbeck", "William Faulkner"], correctIndex: 1, explanation: "F. Scott Fitzgerald wrote 'The Great Gatsby', a classic 1925 novel analyzing the moral decay behind the roaring twenties in America.", difficulty: 1 },
+        { question: "Which novel features the character 'Atticus Finch'?", options: ["To Kill a Mockingbird", "The Catcher in the Rye", "Of Mice and Men", "Beloved"], correctIndex: 0, explanation: "Atticus Finch serves as the moral compass and defense attorney in Harper Lee's Pulitzer Prize-winning novel, 'To Kill a Mockingbird'.", difficulty: 1 },
+        { question: "Who wrote 'The Odyssey'?", options: ["Homer", "Sophocles", "Virgil", "Plato"], correctIndex: 0, explanation: "Homer, a legendary ancient Greek author, is traditionally attributed with composing 'The Odyssey', one of the oldest extant works of literature.", difficulty: 1 },
+        { question: "Which book begins with 'It was the best of times, it was the worst of times'?", options: ["A Tale of Two Cities", "Great Expectations", "Les Misérables", "War and Peace"], correctIndex: 0, explanation: "This famous opening line is from Charles Dickens' 1859 historical novel 'A Tale of Two Cities', set in London and Paris during the French Revolution.", difficulty: 2 }
+      ]
+    };
+
+    function getGreeting() {
+      const hour = new Date().getHours();
+      if (hour < 12) return "Good morning";
+      if (hour < 18) return "Good afternoon";
+      return "Good evening";
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = 'index.html'; return; }
+      const docRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(docRef);
+      let displayName = user.displayName || 'Student';
+      if (docSnap.exists()) {
+        displayName = docSnap.data().name || displayName;
+        session.grade = docSnap.data().grade || '';
+      }
+      session.name = displayName;
+      session.id = user.uid;
+
+      document.getElementById('userNameDisplay').innerText = displayName;
+      document.getElementById('welcomeMessage').innerHTML = `${getGreeting()}, ${displayName.split(' ')[0]}! 👋`;
+      document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
+      document.getElementById('greeting').innerText = getGreeting() + ',';
+    });
+
+    window.logout = async () => {
+      await signOut(auth);
+      window.location.replace('index.html');
+    };
+
+    window.startTest = function () {
+      document.getElementById('startTestContainer').style.display = 'none';
+      document.getElementById('assessmentContent').style.display = 'block';
+      session.startTime = new Date().toISOString();
+      loadNextQuestion();
+    };
+
+    function getQuestionByDifficulty(topic, difficulty) {
+      const pool = QUESTION_BANK[topic] || QUESTION_BANK.general;
+      const filtered = pool.filter(q => q.difficulty === difficulty);
+      if (filtered.length === 0) return pool[Math.floor(Math.random() * pool.length)];
+      return filtered[Math.floor(Math.random() * filtered.length)];
+    }
+
+    async function loadNextQuestion() {
+      if (session.questionCount >= MAX_QUESTIONS) { finishAssessment(); return; }
+      let diffIndex = 1; // medium default
+      if (session.globalTheta < -1) diffIndex = 0; // easy
+      else if (session.globalTheta > 1) diffIndex = 2; // hard
+
+      const topic = session.currentTopic;
+      let q = getQuestionByDifficulty(topic, diffIndex);
+      // Avoid exact duplicates within session
+      const qHash = q.question.slice(0, 30);
+      if (session.usedIds.includes(qHash)) {
+        // pick another random from same pool
+        const pool = QUESTION_BANK[topic] || QUESTION_BANK.general;
+        q = pool[Math.floor(Math.random() * pool.length)];
+      }
+      session.usedIds.push(q.question.slice(0, 30));
+      currentQuestion = {
+        ...q,
+        difficulty: diffIndex,
+        topic: session.currentTopic,
+        subtopic: 'General',
+        text: q.question,
+        correct: q.correctIndex,
+        b: diffIndex === 0 ? -1.5 : (diffIndex === 2 ? 1.5 : 0)
+      };
+      selectedOption = null;
+      answered = false;
+      renderQuestion(currentQuestion);
+      updateUI();
+      startTimer();
+      document.getElementById('nextBtnWrap').style.display = 'none';
+      document.getElementById('submitBtn').style.display = 'block';
+    }
+
+    function renderQuestion(q) {
+      const idx = session.questionCount + 1;
+      document.getElementById('qNumber').innerText = `Question ${idx}`;
+      document.getElementById('progText').innerText = `Question ${idx} of ${MAX_QUESTIONS}`;
+      document.getElementById('progressFill').style.width = `${(idx / MAX_QUESTIONS) * 100}%`;
+      document.getElementById('qText').innerText = q.question;
+      document.getElementById('topicTags').innerHTML = `<span class="topic-pill" style="color:var(--neon-cyan); border-color:var(--neon-cyan);">${session.currentTopic}</span>`;
+      const diffLabels = ['Easy', 'Medium', 'Hard'];
+      const diffColors = ['#10b981', '#f59e0b', '#ef4444'];
+      document.getElementById('difficultyDisplay').innerHTML = `<span style="color:${diffColors[q.difficulty]}">${diffLabels[q.difficulty]}</span>`;
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.id = `opt${i}`;
+        btn.onclick = () => selectOption(i);
+        btn.innerHTML = `<span class="opt-letter">${String.fromCharCode(65 + i)}</span><span>${opt}</span>`;
+        grid.appendChild(btn);
+      });
+      document.getElementById('feedbackBanner').style.display = 'none';
+      document.getElementById('submitBtn').disabled = true;
+    }
+
+    function selectOption(i) {
+      if (answered) return;
+      selectedOption = i;
+      document.querySelectorAll('.option-btn').forEach((b, j) => {
+        b.classList.toggle('selected', j === i);
+      });
+      document.getElementById('submitBtn').disabled = false;
+    }
+
+    window.submitAnswer = function () {
+      if (selectedOption === null || answered) return;
+      answered = true;
+      clearInterval(timerInterval);
+      const isCorrect = selectedOption === currentQuestion.correctIndex;
+      document.querySelectorAll('.option-btn').forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === currentQuestion.correctIndex) btn.classList.add('correct');
+        else if (i === selectedOption && !isCorrect) btn.classList.add('wrong');
+      });
+
+      const banner = document.getElementById('feedbackBanner');
+      const icon = document.getElementById('feedbackIcon');
+      const text = document.getElementById('feedbackText');
+      const expl = document.getElementById('explanationText');
+      banner.className = `feedback-banner ${isCorrect ? 'correct' : 'wrong'}`;
+      icon.innerText = isCorrect ? '✓' : '✗';
+      text.innerText = isCorrect ? 'Correct!' : `Incorrect. The answer is ${String.fromCharCode(65 + currentQuestion.correctIndex)}.`;
+      expl.innerHTML = currentQuestion.explanation ? `<strong>💡 Explanation:</strong> ${currentQuestion.explanation}` : '';
+      banner.style.display = 'block';
+
+      session.responses.push({
+        question: currentQuestion,
+        correct: isCorrect,
+        selectedOption,
+        timestamp: new Date().toISOString()
+      });
+      session.questionCount++;
+      const delta = isCorrect ? 0.2 : -0.2;
+      session.globalTheta = Math.max(-3, Math.min(3, session.globalTheta + delta));
+      session.topicThetas[session.currentTopic] = session.topicThetas[session.currentTopic] || 0;
+      session.topicThetas[session.currentTopic] += delta;
+      session.seTheta = 0.5;
+      updateUI();
+      document.getElementById('submitBtn').style.display = 'none';
+      document.getElementById('nextBtnWrap').style.display = 'block';
+    };
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 60;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          if (!answered) {
+            answered = true;
+            session.responses.push({
+              question: currentQuestion,
+              correct: false,
+              selectedOption: -1,
+              timedOut: true,
+              timestamp: new Date().toISOString()
+            });
+            session.questionCount++;
+            session.globalTheta -= 0.2;
+            session.topicThetas[session.currentTopic] = (session.topicThetas[session.currentTopic] || 0) - 0.2;
+            updateUI();
+            const banner = document.getElementById('feedbackBanner');
+            banner.className = 'feedback-banner wrong';
+            document.getElementById('feedbackIcon').innerText = '⏰';
+            document.getElementById('feedbackText').innerText = "Time's up! Question skipped.";
+            document.getElementById('explanationText').innerHTML = currentQuestion.explanation ? `<strong>💡 Explanation:</strong> ${currentQuestion.explanation}` : '';
+            banner.style.display = 'block';
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtnWrap').style.display = 'block';
+          }
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const pct = timeLeft / 60;
+      const offset = 201 * (1 - pct);
+      document.getElementById('timerCircle').style.strokeDashoffset = offset;
+      const hue = pct > 0.5 ? 160 : pct > 0.25 ? 40 : 0;
+      document.getElementById('timerCircle').style.stroke = `hsl(${hue}, 80%, 55%)`;
+      document.getElementById('timerVal').innerText = timeLeft;
+      document.getElementById('timerVal').style.color = timeLeft <= 10 ? '#ff0055' : 'var(--text-primary)';
+    }
+
+    function updateUI() {
+      document.getElementById('abilityVal').innerText = session.globalTheta.toFixed(3);
+      const topicTheta = session.topicThetas[session.currentTopic] || 0;
+      document.getElementById('topicAbilityVal').innerText = topicTheta.toFixed(3);
+      document.getElementById('thetaLabel').innerText = `θ = ${session.globalTheta.toFixed(3)}`;
+      const pct = ((session.globalTheta + 4) / 8) * 100;
+      document.getElementById('thetaIndicator').style.left = `${Math.max(2, Math.min(98, pct))}%`;
+    }
+
+    function finishAssessment() {
+      clearInterval(timerInterval);
+      session.completed = true;
+      session.endTime = new Date().toISOString();
+      localStorage.setItem('currentSession', JSON.stringify(session));
+      window.location.href = 'report.html';
+    }
+
+    window.loadNextQuestion = loadNextQuestion;
+
+    // Sidebar topic change
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        session.currentTopic = item.dataset.topic;
+        if (session.questionCount > 0 && document.getElementById('assessmentContent').style.display === 'block') {
+          loadNextQuestion();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdaptIQ – Admin Panel</title>
+  <link rel="stylesheet" href="css/style1.css" />
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 100px auto 40px;
+      padding: 0 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin: 40px 0;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--accent-purple);
+      margin: 16px 0;
+    }
+
+    .code-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-top: 40px;
+    }
+
+    .code-display {
+      background: #1a1a28;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      font-family: monospace;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      text-align: center;
+      margin: 24px 0;
+      border: 1px dashed var(--accent-purple);
+    }
+
+    .btn {
+      margin-right: 12px;
+    }
+
+    .menu-dropdown {
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0.5rem 0;
+      display: none;
+      flex-direction: column;
+      min-width: 160px;
+      z-index: 100;
+    }
+
+    .menu-dropdown.show {
+      display: flex;
+    }
+
+    .menu-dropdown a {
+      padding: 0.75rem 1rem;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .menu-dropdown a:hover {
+      background: rgba(99, 102, 241, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">AdaptIQ</a>
+      <div class="flex gap-8">
+        <div id="menuIcon" style="cursor:pointer; font-size:1.8rem;">☰</div>
+      </div>
+    </div>
+    <div id="roleMenu" class="menu-dropdown">
+      <a href="instructor.html">Instructor Dashboard</a>
+      <a href="admin.html">Admin Panel</a>
+      <a href="#" onclick="logout(); return false;">Logout</a>
+    </div>
+  </header>
+
+  <div class="admin-container">
+    <h1>Admin Panel</h1>
+    <p style="color: var(--text-secondary);">Manage instructors and view platform statistics.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Students</h3>
+        <div class="stat-number" id="studentCount">—</div>
+      </div>
+      <div class="stat-card">
+        <h3>Total Instructors</h3>
+        <div class="stat-number" id="instructorCount">—</div>
+      </div>
+      <div class="stat-card">
+        <h3>Active Codes</h3>
+        <div class="stat-number" id="activeCodes">—</div>
+      </div>
+    </div>
+
+    <div class="code-section">
+      <h2>Generate Instructor Invitation Code</h2>
+      <p>Create a one-time code for instructor sign-up.</p>
+      <div class="code-display" id="generatedCode">Click generate to create a new code</div>
+      <button class="btn btn-primary" onclick="generateCode()">Generate New Code</button>
+      <button class="btn btn-secondary" onclick="copyCode()">Copy Code</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, addDoc, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1wU1fyWECpkTXprHwDEUUs8YraFFdiHk",
+      authDomain: "college-website-e4684.firebaseapp.com",
+      projectId: "college-website-e4684",
+      storageBucket: "college-website-e4684.firebasestorage.app",
+      messagingSenderId: "860004770297",
+      appId: "1:860004770297:web:1550b244e4af7c74901d28",
+      measurementId: "G-G0YN0KDJ67"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const menuIcon = document.getElementById('menuIcon');
+    const roleMenu = document.getElementById('roleMenu');
+    menuIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      roleMenu.classList.toggle('show');
+    });
+    document.addEventListener('click', () => roleMenu.classList.remove('show'));
+
+    // Check admin role
+    if (localStorage.getItem('adminKey') === 'true') {
+      loadStats();
+    } else {
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = 'index.html'; return; }
+
+        // Hardcoded admin check fallback
+        if (user.email !== 'eswarakhil36@gmail.com') {
+          alert('Access denied. Admins only.');
+          window.location.href = 'dashboard.html';
+          return;
+        }
+        loadStats();
+      });
+    }
+
+    window.logout = async () => {
+      localStorage.removeItem('adminKey');
+      const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+      await signOut(auth);
+      window.location.replace('index.html');
+    };
+
+    async function loadStats() {
+      const studentsQuery = query(collection(db, 'users'), where('role', '==', 'student'));
+      const studentSnap = await getDocs(studentsQuery);
+      document.getElementById('studentCount').innerText = studentSnap.size;
+
+      const instructorsQuery = query(collection(db, 'users'), where('role', '==', 'instructor'));
+      const instructorSnap = await getDocs(instructorsQuery);
+      document.getElementById('instructorCount').innerText = instructorSnap.size;
+
+      const codesQuery = query(collection(db, 'instructor_codes'), where('used', '==', false));
+      const codesSnap = await getDocs(codesQuery);
+      document.getElementById('activeCodes').innerText = codesSnap.size;
+    }
+
+    window.generateCode = async function () {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+      try {
+        await addDoc(collection(db, 'instructor_codes'), { code, used: false, createdAt: new Date().toISOString() });
+        document.getElementById('generatedCode').innerText = code;
+        loadStats();
+      } catch (e) { alert('Error: ' + e.message); }
+    };
+
+    window.copyCode = function () {
+      const code = document.getElementById('generatedCode').innerText;
+      if (code && code !== 'Click generate to create a new code') {
+        navigator.clipboard.writeText(code);
+        alert('Code copied!');
+      }
+    };
+  </script>
+</body>
+
+</html>

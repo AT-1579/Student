@@ -503,17 +503,29 @@
             });
 
             // ── Radar Chart ──
+            const allTopicsList = ['general', 'physics', 'math', 'chemistry', 'history', 'literature'];
+            const radarLabels = [];
+            const radarData = [];
+            const radarBg = [];
+            allTopicsList.forEach(t => {
+                const p = profile.topicProfiles.find(x => x.topic === t);
+                radarLabels.push(t);
+                // If a topic wasn't tested, default to a neutral/low score for the radar visualization
+                radarData.push(p ? Math.max(0, (p.theta + 4) / 8 * 100) : 0);
+                radarBg.push(TOPIC_COLORS[t] || '#6366f1');
+            });
+
             const radarCtx = document.getElementById('radarChart').getContext('2d');
             new Chart(radarCtx, {
                 type: 'radar',
                 data: {
-                    labels: profile.topicProfiles.map(t => t.topic),
+                    labels: radarLabels,
                     datasets: [{
                         label: 'Ability',
-                        data: profile.topicProfiles.map(t => Math.max(0, (t.theta + 4) / 8 * 100)),
+                        data: radarData,
                         backgroundColor: 'rgba(99,102,241,0.15)',
                         borderColor: '#6366f1',
-                        pointBackgroundColor: profile.topicProfiles.map(t => TOPIC_COLORS[t.topic]),
+                        pointBackgroundColor: radarBg,
                         pointRadius: 5, borderWidth: 2
                     }]
                 },

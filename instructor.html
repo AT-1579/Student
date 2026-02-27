@@ -2,447 +2,196 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AdaptIQ – Instructor Dashboard</title>
-    <link rel="stylesheet" href="css/style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <style>
-        .dash-wrap {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 40px 24px 80px;
-            position: relative;
-            z-index: 1;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdaptIQ – Instructor</title>
+  <link rel="stylesheet" href="css/style1.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .instructor-container {
+      max-width: 1200px;
+      margin: 100px auto;
+      padding: 0 24px;
+    }
 
-        /* ── Stat Cards Row ── */
-        .stats-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 28px;
-        }
+    .student-list {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      margin-top: 40px;
+    }
 
-        @media (max-width: 700px) {
-            .stats-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+    .student-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
 
-        /* ── Charts ── */
-        .charts-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            margin-bottom: 28px;
-        }
+    .weak {
+      color: #f87171;
+    }
 
-        @media (max-width: 700px) {
-            .charts-2 {
-                grid-template-columns: 1fr;
-            }
-        }
+    .chart-container {
+      width: 100%;
+      height: 300px;
+      margin: 40px 0;
+    }
 
-        /* ── Student Table ── */
-        .student-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    .menu-dropdown {
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0.5rem 0;
+      display: none;
+      flex-direction: column;
+      min-width: 160px;
+      z-index: 100;
+    }
 
-        .student-table th {
-            text-align: left;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-            padding: 0 16px 12px;
-            border-bottom: 1px solid var(--border);
-        }
+    .menu-dropdown.show {
+      display: flex;
+    }
 
-        .student-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            font-size: 0.88rem;
-        }
-
-        .student-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .student-table tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .rank-badge {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        .section-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* ── Topic Performance Table ── */
-        .topic-perf-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .topic-perf-row:last-child {
-            border-bottom: none;
-        }
-
-        .topic-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        /* ── Empty State ── */
-        .empty {
-            text-align: center;
-            padding: 60px 24px;
-        }
-
-        .empty-emoji {
-            font-size: 3rem;
-            margin-bottom: 16px;
-        }
-
-        /* ── Greeting ── */
-        .greet-banner {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            padding: 28px 32px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 28px;
-            gap: 16px;
-        }
-
-        .greet-text h2 {
-            margin-bottom: 6px;
-        }
-
-        .greet-text p {
-            font-size: 0.9rem;
-        }
-    </style>
+    .menu-dropdown a {
+      padding: 0.75rem 1rem;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+  </style>
 </head>
 
 <body>
-    <div class="orb orb-1" style="opacity:0.3;"></div>
-    <div class="orb orb-2" style="opacity:0.15;"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-inner">
-            <a class="logo" href="index.html">AdaptIQ</a>
-            <a class="btn btn-secondary btn-sm" href="index.html">← Back</a>
-        </div>
-    </header>
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">AdaptIQ</a>
+      <div class="flex gap-8">
+        <div id="menuIcon" style="cursor:pointer; font-size:1.8rem;">☰</div>
+      </div>
+    </div>
+    <div id="roleMenu" class="menu-dropdown">
+      <a href="instructor.html">Instructor Dashboard</a>
+      <a href="admin.html">Admin Panel</a>
+      <a href="#" onclick="logout(); return false;">Logout</a>
+    </div>
+  </header>
 
-    <div class="dash-wrap">
+  <div class="instructor-container">
+    <h1>Instructor Dashboard</h1>
+    <p>Class performance and analytics</p>
 
-        <!-- Greeting -->
-        <div class="greet-banner animate-fade-up">
-            <div class="greet-text">
-                <h2>Welcome, <span class="grad-text-purple" id="instructorGreet">Instructor</span> 👋</h2>
-                <p>Here's an overview of all completed assessment sessions.</p>
-            </div>
-            <div style="text-align:right;">
-                <div style="font-size:0.75rem;color:var(--text-muted);">Today</div>
-                <div style="font-size:1rem;font-weight:600;" id="todayDate">—</div>
-            </div>
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" style="display:none;">
-            <div class="card empty">
-                <div class="empty-emoji">📋</div>
-                <h3>No completed sessions yet</h3>
-                <p style="margin:10px 0 24px;">Students haven't completed any assessments. Share the Student link to get
-                    started!</p>
-                <a class="btn btn-primary" href="index.html">← Back to home</a>
-            </div>
-        </div>
-
-        <!-- Dashboard Content -->
-        <div id="dashContent" style="display:none;">
-
-            <!-- Stats Row -->
-            <div class="stats-4">
-                <div class="card stat-card animate-fade-up" style="animation-delay:0.05s;">
-                    <div class="stat-value grad-text-purple" id="totalStudents">0</div>
-                    <div class="stat-label">Students</div>
-                </div>
-                <div class="card stat-card animate-fade-up" style="animation-delay:0.10s;">
-                    <div class="stat-value" style="color:var(--accent-cyan);" id="avgTheta">—</div>
-                    <div class="stat-label">Avg Ability (θ)</div>
-                </div>
-                <div class="card stat-card animate-fade-up" style="animation-delay:0.15s;">
-                    <div class="stat-value" style="color:var(--accent-green);" id="avgAccuracy">—%</div>
-                    <div class="stat-label">Avg Accuracy</div>
-                </div>
-                <div class="card stat-card animate-fade-up" style="animation-delay:0.20s;">
-                    <div class="stat-value" style="color:var(--accent-amber);" id="avgQuestions">—</div>
-                    <div class="stat-label">Avg Questions</div>
-                </div>
-            </div>
-
-            <!-- Charts -->
-            <div class="charts-2">
-                <div class="card chart-card animate-fade-up" style="animation-delay:0.25s;">
-                    <div class="section-title">
-                        <div class="section-icon" style="background:rgba(99,102,241,0.15);">📊</div>
-                        Ability Distribution
-                    </div>
-                    <div style="height:220px;"><canvas id="distChart"></canvas></div>
-                </div>
-                <div class="card chart-card animate-fade-up" style="animation-delay:0.30s;">
-                    <div class="section-title">
-                        <div class="section-icon" style="background:rgba(34,211,238,0.12);">🗂️</div>
-                        Class Topic Averages
-                    </div>
-                    <div style="height:220px;"><canvas id="topicAvgChart"></canvas></div>
-                </div>
-            </div>
-
-            <!-- Topic Performance -->
-            <div class="card animate-fade-up" style="margin-bottom:24px;animation-delay:0.35s;">
-                <div class="section-title">
-                    <div class="section-icon" style="background:rgba(245,158,11,0.12);">📚</div>
-                    Topic-Level Class Performance
-                </div>
-                <div id="topicPerfList"></div>
-            </div>
-
-            <!-- Student Table -->
-            <div class="card animate-fade-up" style="animation-delay:0.4s;">
-                <div
-                    style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-                    <div class="section-title" style="margin-bottom:0;">
-                        <div class="section-icon" style="background:rgba(99,102,241,0.15);">🎓</div>
-                        Student Results
-                    </div>
-                    <input id="searchInput" class="input" type="text" placeholder="Search students…"
-                        style="max-width:220px;padding:8px 14px;font-size:0.88rem;" oninput="filterTable()" />
-                </div>
-                <div style="overflow-x:auto;">
-                    <table class="student-table" id="studentTable">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Student</th>
-                                <th>Grade</th>
-                                <th>Ability (θ)</th>
-                                <th>Mastery</th>
-                                <th>Accuracy</th>
-                                <th>Questions</th>
-                                <th>Strengths</th>
-                                <th>Report</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentTbody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <div class="chart-container">
+      <canvas id="performanceChart"></canvas>
     </div>
 
-    <script src="js/questionBank.js"></script>
-    <script src="js/adaptiveEngine.js"></script>
-    <script>
-        let allSessions = [];
+    <div class="student-list" id="studentList">
+      <h3>Student Performance</h3>
+      <div class="student-item"><span>Loading...</span></div>
+    </div>
+  </div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('instructorGreet').textContent =
-                localStorage.getItem('instructorName') || 'Instructor';
-            document.getElementById('todayDate').textContent =
-                new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 
-            allSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1wU1fyWECpkTXprHwDEUUs8YraFFdiHk",
+      authDomain: "college-website-e4684.firebaseapp.com",
+      projectId: "college-website-e4684",
+      storageBucket: "college-website-e4684.firebasestorage.app",
+      messagingSenderId: "860004770297",
+      appId: "1:860004770297:web:1550b244e4af7c74901d28",
+      measurementId: "G-G0YN0KDJ67"
+    };
 
-            if (allSessions.length === 0) {
-                document.getElementById('emptyState').style.display = 'block';
-            } else {
-                document.getElementById('dashContent').style.display = 'block';
-                renderDashboard(allSessions);
-            }
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Menu toggle
+    const menuIcon = document.getElementById('menuIcon');
+    const roleMenu = document.getElementById('roleMenu');
+    menuIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      roleMenu.classList.toggle('show');
+    });
+    document.addEventListener('click', () => roleMenu.classList.remove('show'));
+
+    if (localStorage.getItem('adminKey') === 'true') {
+      loadInstructorData();
+    } else {
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = 'index.html'; return; }
+
+        // Admin bypass fallback
+        if (user.email === 'eswarakhil36@gmail.com') {
+          loadInstructorData();
+          return;
+        }
+
+        // Check if user is instructor
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== 'instructor') {
+          alert('Access denied. Instructors only.');
+          window.location.href = 'dashboard.html';
+          return;
+        }
+        loadInstructorData();
+      });
+    }
+
+    window.logout = async () => {
+      localStorage.removeItem('adminKey');
+      const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+      await signOut(auth);
+      window.location.replace('index.html');
+    };
+
+    async function loadInstructorData() {
+      // Get all students
+      const studentsQuery = query(collection(db, 'users'), where('role', '==', 'student'));
+      const studentSnap = await getDocs(studentsQuery);
+      const students = studentSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // Display student list with mock weak areas
+      const listDiv = document.getElementById('studentList');
+      if (students.length === 0) {
+        listDiv.innerHTML += '<p>No students yet.</p>';
+      } else {
+        let html = '<h3>Student Performance</h3>';
+        students.forEach(s => {
+          // Mock weak areas – in real app, compute from responses
+          const weak = Math.random() > 0.5 ? 'Algebra' : 'Geometry';
+          html += `<div class="student-item"><span>${s.name}</span><span class="weak">Weak: ${weak}</span></div>`;
         });
+        listDiv.innerHTML = html;
+      }
 
-        function renderDashboard(sessions) {
-            const profiles = sessions.map(s =>
-                AdaptiveEngine.generateProfile(s.globalTheta, s.topicThetas, s.responses)
-            );
-
-            // ── Stats ──
-            document.getElementById('totalStudents').textContent = sessions.length;
-            const avgTheta = (profiles.reduce((sum, p) => sum + p.globalTheta, 0) / profiles.length).toFixed(3);
-            const avgAcc = (profiles.reduce((sum, p) => sum + parseFloat(p.accuracy), 0) / profiles.length).toFixed(1);
-            const avgQ = Math.round(profiles.reduce((sum, p) => sum + p.totalQuestions, 0) / profiles.length);
-            document.getElementById('avgTheta').textContent = avgTheta;
-            document.getElementById('avgAccuracy').textContent = avgAcc + '%';
-            document.getElementById('avgQuestions').textContent = avgQ;
-
-            // ── Ability Distribution Chart ──
-            const bins = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-            const binCounts = new Array(bins.length - 1).fill(0);
-            profiles.forEach(p => {
-                for (let i = 0; i < bins.length - 1; i++) {
-                    if (p.globalTheta >= bins[i] && p.globalTheta < bins[i + 1]) { binCounts[i]++; break; }
-                }
-            });
-            new Chart(document.getElementById('distChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: bins.slice(0, -1).map((b, i) => `[${b},${bins[i + 1]})`),
-                    datasets: [{
-                        label: '# Students',
-                        data: binCounts,
-                        backgroundColor: 'rgba(99,102,241,0.5)',
-                        borderColor: '#6366f1', borderWidth: 2, borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { ticks: { color: '#8b8fa8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { ticks: { color: '#8b8fa8', font: { size: 9 } }, grid: { display: false } }
-                    }
-                }
-            });
-
-            // ── Class Topic Averages ──
-            const topicAvgs = TOPICS.map(t => {
-                const vals = profiles.map(p => {
-                    const tp = p.topicProfiles.find(x => x.topic === t);
-                    return tp ? tp.theta : 0;
-                });
-                return vals.reduce((s, v) => s + v, 0) / vals.length;
-            });
-            new Chart(document.getElementById('topicAvgChart').getContext('2d'), {
-                type: 'radar',
-                data: {
-                    labels: TOPICS,
-                    datasets: [{
-                        label: 'Avg θ',
-                        data: topicAvgs.map(v => Math.max(0, (v + 4) / 8 * 100)),
-                        backgroundColor: 'rgba(34,211,238,0.1)',
-                        borderColor: '#22d3ee',
-                        pointBackgroundColor: TOPICS.map(t => TOPIC_COLORS[t]),
-                        pointRadius: 4, borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        r: {
-                            min: 0, max: 100,
-                            ticks: { color: '#8b8fa8', font: { size: 9 }, stepSize: 25 },
-                            grid: { color: 'rgba(255,255,255,0.06)' },
-                            pointLabels: { color: '#c4c6d8', font: { size: 11, weight: '600' } },
-                            angleLines: { color: 'rgba(255,255,255,0.06)' }
-                        }
-                    }
-                }
-            });
-
-            // ── Topic Performance ──
-            const tpList = document.getElementById('topicPerfList');
-            TOPICS.forEach((t, i) => {
-                const avg = topicAvgs[i].toFixed(3);
-                const m = AdaptiveEngine.masteryLevel(topicAvgs[i]);
-                const pct = ((topicAvgs[i] + 4) / 8 * 100).toFixed(0);
-                const row = document.createElement('div');
-                row.className = 'topic-perf-row';
-                row.innerHTML = `
-          <div class="topic-dot" style="background:${TOPIC_COLORS[t]};"></div>
-          <div style="flex:1;">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-              <span style="font-weight:600;font-size:0.9rem;color:${TOPIC_COLORS[t]}">${t}</span>
-              <span style="font-size:0.8rem;color:${m.color};">${m.label} (θ̄ = ${avg})</span>
-            </div>
-            <div class="mastery-bar-track">
-              <div class="mastery-bar-fill" style="width:${pct}%;background:${TOPIC_COLORS[t]};"></div>
-            </div>
-          </div>`;
-                tpList.appendChild(row);
-            });
-
-            // ── Student Table ──
-            const tbody = document.getElementById('studentTbody');
-            const sorted = [...profiles].map((p, i) => ({ p, s: sessions[i] })).sort((a, b) => b.p.globalTheta - a.p.globalTheta);
-            sorted.forEach(({ p, s }, i) => {
-                const rank = i + 1;
-                const rankColors = ['#f59e0b', '#9ca3af', '#cd7c3a'];
-                const rankBg = rank <= 3 ? rankColors[rank - 1] + '30' : 'rgba(255,255,255,0.06)';
-                const rankC = rank <= 3 ? rankColors[rank - 1] : 'var(--text-muted)';
-                const mastery = p.globalMastery;
-                const strengthStr = p.strengths.map(x => x.topic).join(', ') || '—';
-
-                const tr = document.createElement('tr');
-                tr.dataset.name = s.name.toLowerCase();
-                tr.innerHTML = `
-          <td><div class="rank-badge" style="background:${rankBg};color:${rankC};">${rank}</div></td>
-          <td><div style="font-weight:600;">${s.name}</div><div style="font-size:0.75rem;color:var(--text-muted);">${s.id}</div></td>
-          <td style="color:var(--text-muted);">${s.grade || '—'}</td>
-          <td style="font-weight:700;color:#a5b4fc;">${p.globalTheta}</td>
-          <td><span style="padding:3px 10px;border-radius:100px;font-size:0.75rem;font-weight:700;background:${mastery.color}22;color:${mastery.color};border:1px solid ${mastery.color}44;">${mastery.label}</span></td>
-          <td>${p.accuracy}%</td>
-          <td>${p.totalQuestions}</td>
-          <td style="font-size:0.82rem;color:var(--accent-green);">${strengthStr}</td>
-          <td>
-            <button class="btn btn-secondary btn-sm" onclick="viewReport(${JSON.stringify(JSON.stringify(s)).slice(1, -1)})">View →</button>
-          </td>`;
-                tbody.appendChild(tr);
-            });
+      // Dummy chart (replace with real data)
+      const ctx = document.getElementById('performanceChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Week1', 'Week2', 'Week3', 'Week4'],
+          datasets: [{
+            label: 'Class Average Ability',
+            data: [0.2, 0.5, 0.8, 1.2],
+            borderColor: '#6366f1'
+          }]
         }
-
-        function viewReport(sessionStr) {
-            try {
-                const s = JSON.parse(sessionStr);
-                localStorage.setItem('currentSession', JSON.stringify(s));
-                window.open('report.html', '_blank');
-            } catch (e) { alert('Could not load report.'); }
-        }
-
-        function filterTable() {
-            const val = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('#studentTbody tr').forEach(tr => {
-                tr.style.display = tr.dataset.name.includes(val) ? '' : 'none';
-            });
-        }
-    </script>
+      });
+    }
+  </script>
 </body>
 
 </html>
